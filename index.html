@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Complete Home Server &amp; Desktop Build Guide</title>
+<title>Home Server &amp; Desktop Build Guide — AM5 · Ryzen 9 7900 · Proxmox</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -17,7 +17,7 @@
   --r: 8px; --rl: 12px;
   --mono: 'Courier New', monospace;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --sidebar-w: 220px;
+  --sidebar-w: 228px;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -31,7 +31,6 @@
   }
 }
 body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; }
-/* Layout */
 .layout { display: flex; min-height: 100vh; }
 .sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--bg2); border-right: 0.5px solid var(--border2); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 0 0 24px; }
 .sidebar-header { padding: 18px 16px 12px; border-bottom: 0.5px solid var(--border); }
@@ -43,10 +42,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 .nav-item:hover { background: var(--bg3); color: var(--text); }
 .nav-item.active { background: var(--bg3); color: var(--text); border-left-color: var(--text); font-weight: 500; }
 .nav-icon { font-size: 14px; flex-shrink: 0; }
-.main { flex: 1; min-width: 0; padding: 32px 40px; max-width: 800px; }
+.main { flex: 1; min-width: 0; padding: 32px 40px; max-width: 820px; }
 .section { display: none; }
 .section.active { display: block; }
-/* Typography */
 .sec-title { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
 .sec-sub { font-size: 13px; color: var(--text2); margin-bottom: 24px; line-height: 1.65; border-bottom: 0.5px solid var(--border); padding-bottom: 16px; }
 .divider { font-size: 10px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin: 24px 0 10px; border-bottom: 0.5px solid var(--border); padding-bottom: 5px; }
@@ -62,7 +60,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 /* Callouts */
 .tip { margin-top: 8px; padding: 8px 12px; background: var(--info-bg); border-radius: var(--r); font-size: 12px; color: var(--info); line-height: 1.55; }
 .warn-box { margin-top: 8px; padding: 8px 12px; background: var(--warn-bg); border-radius: var(--r); font-size: 12px; color: var(--warn); line-height: 1.55; }
-/* Code */
+/* Code blocks */
 .cb { font-family: var(--mono); font-size: 11px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--r); padding: 11px 14px; color: var(--text); line-height: 1.8; margin: 8px 0; white-space: pre-wrap; word-break: break-all; }
 .ic { font-family: var(--mono); background: var(--bg2); border: 0.5px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 11px; }
 .fh { background: var(--bg3); border: 0.5px solid var(--border); border-bottom: none; border-radius: var(--r) var(--r) 0 0; padding: 5px 14px; font-family: var(--mono); font-size: 10.5px; color: var(--text3); }
@@ -83,8 +81,12 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 .bn { background: var(--info-bg); color: var(--info); }
 .bw { background: var(--warn-bg); color: var(--warn); }
 .bd { background: var(--danger-bg); color: var(--danger); }
-/* Total row */
-.total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 14px 16px; background: var(--bg2); border-radius: var(--rl); }
+/* Phase total rows */
+.phase-total { display: flex; justify-content: space-between; align-items: center; margin: 16px 0 6px; padding: 10px 14px; background: var(--bg3); border-radius: var(--r); }
+.phase-total-label { font-size: 11px; font-weight: 500; color: var(--text2); }
+.phase-total-amt { font-size: 15px; font-weight: 500; }
+.total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding: 14px 16px; background: var(--bg2); border-radius: var(--rl); border: 0.5px solid var(--border2); }
+.total-label { font-size: 13px; font-weight: 500; }
 .total-amount { font-size: 20px; font-weight: 500; }
 /* BIOS cards */
 .bcard { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--r); padding: 11px 14px; margin-bottom: 8px; }
@@ -93,7 +95,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 .bval { font-size: 11.5px; color: var(--text2); line-height: 1.5; }
 .bval strong { color: var(--success); }
 /* Checklist */
-.prog-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin: 6px 0 16px; }
+.prog-wrap { margin-bottom: 18px; }
+.prog-label { font-size: 12px; color: var(--text2); margin-bottom: 5px; }
+.prog-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
 .prog-fill { height: 100%; background: var(--text); border-radius: 2px; transition: width .3s; }
 .chk-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); cursor: pointer; }
 .chk-row:last-child { border-bottom: none; }
@@ -109,35 +113,29 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 .vslab { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
 .vsval { font-size: 12px; font-weight: 500; }
 .vmdesc { font-size: 12px; color: var(--text2); line-height: 1.55; }
-/* Auto cards */
-.acard { background: var(--bg2); border-radius: var(--rl); padding: 14px 16px; margin-bottom: 12px; border: 0.5px solid var(--border); }
-.atitle { font-size: 13.5px; font-weight: 500; margin-bottom: 4px; }
-.adesc { font-size: 12px; color: var(--text2); margin-bottom: 10px; line-height: 1.5; }
-/* Backup rows */
-.bkrow { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; padding: 7px 0; border-bottom: 0.5px solid var(--border); }
-.bkrow:last-child { border-bottom: none; }
-.bkk { font-size: 11.5px; font-weight: 500; color: var(--text2); }
-.bkv { font-size: 11.5px; line-height: 1.5; }
-/* Ref URLs */
-.url-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
-.url-row { display: grid; grid-template-columns: 200px 1fr; gap: 12px; padding: 8px 0; border-bottom: 0.5px solid var(--border); align-items: center; }
-.url-row:last-child { border-bottom: none; }
-.url-label { font-size: 12px; font-weight: 500; }
-.url-val { font-family: var(--mono); font-size: 11px; color: var(--info); }
+/* Service cards */
+.svc-card { background: var(--bg2); border-radius: var(--r); padding: 11px 14px; margin-bottom: 8px; border: 0.5px solid var(--border); }
+.svc-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+.svc-desc { font-size: 12px; color: var(--text2); margin-bottom: 6px; line-height: 1.5; }
+.svc-url { font-family: var(--mono); font-size: 11px; color: var(--info); }
+/* Table */
+.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 10px 0; }
+.tbl th { font-size: 10px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; padding: 6px 10px; border-bottom: 0.5px solid var(--border2); text-align: left; }
+.tbl td { padding: 9px 10px; border-bottom: 0.5px solid var(--border); color: var(--text2); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl td:first-child { font-weight: 500; color: var(--text); }
+/* Network grid */
+.net-row { display: grid; grid-template-columns: 160px 130px 1fr; gap: 12px; padding: 9px 0; border-bottom: 0.5px solid var(--border); align-items: start; }
+.net-row:last-child { border-bottom: none; }
+.net-host { font-size: 13px; font-weight: 500; }
+.net-ip { font-family: var(--mono); font-size: 12px; color: var(--info); }
+.net-svc { font-size: 11.5px; color: var(--text2); line-height: 1.5; }
 /* Done box */
 .done-box { display: none; margin-top: 16px; padding: 14px; background: var(--success-bg); border-radius: var(--rl); text-align: center; }
 .done-box p { color: var(--success); }
 .done-box p:first-child { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
 .done-box p:last-child { font-size: 12px; }
-/* Spec grid */
-.spec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
-.spec-card { background: var(--bg2); border-radius: var(--r); padding: 10px 12px; }
-.sc-label { font-size: 10px; color: var(--text3); margin-bottom: 3px; }
-.sc-val { font-size: 12px; font-weight: 500; line-height: 1.4; }
-/* Progress bar main */
-.pbar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin: 8px 0 3px; }
-.pfill { height: 100%; border-radius: 3px; }
-/* Scrollbar */
+/* Sidebar scrollbar */
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
 .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
@@ -146,11 +144,11 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 <body>
 <div class="layout">
 
-<!-- SIDEBAR -->
+<!-- ═══════════ SIDEBAR ═══════════ -->
 <nav class="sidebar">
   <div class="sidebar-header">
     <p class="sidebar-title">Home Server &amp; Desktop</p>
-    <p class="sidebar-sub">Complete build guide</p>
+    <p class="sidebar-sub">AM5 · Ryzen 9 7900 · Proxmox VE</p>
   </div>
 
   <div class="nav-group">
@@ -161,20 +159,21 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
   </div>
 
   <div class="nav-group">
-    <p class="nav-group-label">Phase 2 — BIOS &amp; OS</p>
+    <p class="nav-group-label">Phase 2 — BIOS &amp; IOMMU</p>
     <div class="nav-item" onclick="nav(this,'bios')"><span class="nav-icon">⚙️</span>BIOS settings</div>
-    <div class="nav-item" onclick="nav(this,'solidworks')"><span class="nav-icon">🖥</span>SolidWorks GPU</div>
+    <div class="nav-item" onclick="nav(this,'iommu')"><span class="nav-icon">🔗</span>IOMMU &amp; VFIO</div>
   </div>
 
   <div class="nav-group">
     <p class="nav-group-label">Phase 3 — Proxmox</p>
     <div class="nav-item" onclick="nav(this,'proxmox')"><span class="nav-icon">🖥</span>Proxmox install</div>
-    <div class="nav-item" onclick="nav(this,'vmlayout')"><span class="nav-icon">🗂</span>VM layout</div>
+    <div class="nav-item" onclick="nav(this,'vmlayout')"><span class="nav-icon">🗂</span>VM &amp; CT layout</div>
     <div class="nav-item" onclick="nav(this,'gpupass')"><span class="nav-icon">🎮</span>GPU passthrough</div>
   </div>
 
   <div class="nav-group">
     <p class="nav-group-label">Phase 4 — VMs &amp; Containers</p>
+    <div class="nav-item" onclick="nav(this,'win11vm')"><span class="nav-icon">🪟</span>Windows 11 VM</div>
     <div class="nav-item" onclick="nav(this,'havm')"><span class="nav-icon">🏠</span>Home Assistant VM</div>
     <div class="nav-item" onclick="nav(this,'lxc')"><span class="nav-icon">📦</span>Debian LXC</div>
   </div>
@@ -191,1546 +190,1080 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
   </div>
 
   <div class="nav-group">
-    <p class="nav-group-label">Phase 7 — Network &amp; SSL</p>
-    <div class="nav-item" onclick="nav(this,'networking')"><span class="nav-icon">🌐</span>Networking</div>
-    <div class="nav-item" onclick="nav(this,'ssl')"><span class="nav-icon">🔒</span>Nginx SSL</div>
-    <div class="nav-item" onclick="nav(this,'npmadv')"><span class="nav-icon">🛡</span>NPM advanced</div>
+    <p class="nav-group-label">Phase 7 — Network</p>
+    <div class="nav-item" onclick="nav(this,'networking')"><span class="nav-icon">🌐</span>IP &amp; services</div>
   </div>
 
   <div class="nav-group">
-    <p class="nav-group-label">Phase 8 — Home Assistant</p>
-    <div class="nav-item" onclick="nav(this,'habasics')"><span class="nav-icon">⚙️</span>HA basics</div>
-    <div class="nav-item" onclick="nav(this,'haauto')"><span class="nav-icon">⚡</span>HA automations</div>
-    <div class="nav-item" onclick="nav(this,'haint')"><span class="nav-icon">📱</span>HA integrations</div>
-  </div>
-
-  <div class="nav-group">
-    <p class="nav-group-label">Phase 9 — Backups</p>
-    <div class="nav-item" onclick="nav(this,'dup')"><span class="nav-icon">💾</span>Duplicati setup</div>
-    <div class="nav-item" onclick="nav(this,'b2')"><span class="nav-icon">☁️</span>Backblaze B2</div>
-  </div>
-
-  <div class="nav-group">
-    <p class="nav-group-label">Phase 10 — Maintenance</p>
-    <div class="nav-item" onclick="nav(this,'maintenance')"><span class="nav-icon">🔧</span>Ongoing tasks</div>
+    <p class="nav-group-label">Phase 8 — Reference</p>
+    <div class="nav-item" onclick="nav(this,'power')"><span class="nav-icon">⚡</span>Power budget</div>
+    <div class="nav-item" onclick="nav(this,'storage_expansion')"><span class="nav-icon">📈</span>Storage expansion</div>
     <div class="nav-item" onclick="nav(this,'reference')"><span class="nav-icon">📋</span>Quick reference</div>
   </div>
 </nav>
 
-<!-- MAIN CONTENT -->
+<!-- ═══════════ MAIN CONTENT ═══════════ -->
 <main class="main">
 
-<!-- PARTS LIST -->
+<!-- ══ PARTS LIST ══ -->
 <div class="section active" id="s-parts">
   <p class="sec-title">Parts list</p>
-  <p class="sec-sub">Final build spec — Ryzen 5 5600 AM4 platform configured as a combined home server and desktop workstation with video editing capability. CPU is already owned; all other components listed with estimated pricing.</p>
+  <p class="sec-sub">Updated AM5 platform build — Ryzen 9 7900 as combined home server and desktop workstation running Proxmox VE. Two-phase build: Phase 1 runs the full server stack via iGPU; Phase 2 adds the RTX 4070 Ti Super for video editing and GPU passthrough to Windows VM.</p>
+
+  <div class="divider">Phase 1 — Core Build (~$1,318)</div>
 
   <div class="part-row">
-    <div class="picon" style="background:var(--success-bg)">🧩</div>
-    <div><p class="plabel">CPU</p><p class="pname">AMD Ryzen 5 5600 / 5600X <span class="badge bk">Already owned</span></p><p class="pdesc">6 cores / 12 threads, AM4 socket. Excellent for NAS, Docker, Home Assistant and desktop use simultaneously</p></div>
-    <p class="pprice">$0</p>
+    <div class="picon" style="background:var(--info-bg)">🔴</div>
+    <div><p class="plabel">CPU</p><p class="pname">AMD Ryzen 9 7900</p><p class="pdesc">12 cores / 24 threads, AM5, 65W TDP. RDNA 2 iGPU built-in — Proxmox boots through it permanently. Wraith Prism cooler included in box.</p></div>
+    <p class="pprice">~$300</p>
   </div>
+
   <div class="part-row">
     <div class="picon" style="background:var(--info-bg)">🖥</div>
-    <div><p class="plabel">Motherboard</p><p class="pname">MSI B550-A PRO ATX</p><p class="pdesc">AM4, PCIe 4.0, 6× SATA, dual M.2, USB-C rear IO. Solid VRM for 24/7 operation</p></div>
-    <p class="pprice">~$100</p>
+    <div><p class="plabel">Motherboard</p><p class="pname">MSI B650 Gaming Plus WiFi</p><p class="pdesc">AM5 socket, DDR5, 4× SATA, 2× M.2, WiFi 6E, 2.5G LAN. Solid VRM for 65W 24/7 server use. HDMI output for iGPU display.</p></div>
+    <p class="pprice">~$170</p>
   </div>
+
   <div class="part-row">
     <div class="picon" style="background:var(--info-bg)">🧠</div>
-    <div><p class="plabel">RAM</p><p class="pname">G.Skill Ripjaws V 32GB (2×16GB) DDR4-3200</p><p class="pdesc">32GB for video editing, Docker containers and NAS running simultaneously. Dual-channel CL16</p></div>
-    <p class="pprice">~$60</p>
+    <div><p class="plabel">RAM</p><p class="pname">G.Skill Flare X5 2×32GB DDR5-6000 CL36</p><p class="pdesc">64GB total — 32GB headroom for Windows VM, 6GB for Home Assistant, 8GB for Docker LXC, ~18GB free for ZFS ARC read cache. 2 DIMM slots used, 2 free for 128GB upgrade.</p></div>
+    <p class="pprice">~$145</p>
   </div>
-  <div class="part-row">
-    <div class="picon" style="background:var(--warn-bg)">🎮</div>
-    <div><p class="plabel">GPU <span class="badge bw">Key choice</span></p><p class="pname">NVIDIA RTX 4070 Ti Super 16GB</p><p class="pdesc">16GB GDDR6X — handles 4K video editing in DaVinci Resolve and Premiere Pro. CUDA-accelerated. Also passed through to Windows VM via Proxmox for native desktop performance</p></div>
-    <p class="pprice">~$650</p>
-  </div>
+
   <div class="part-row">
     <div class="picon" style="background:var(--info-bg)">💾</div>
-    <div><p class="plabel">Boot / OS drive</p><p class="pname">WD Blue SN580 1TB NVMe Gen 4</p><p class="pdesc">Proxmox host OS, Windows VM disk, Docker containers and Home Assistant all live here</p></div>
+    <div><p class="plabel">Boot NVMe</p><p class="pname">WD Blue SN580 1TB Gen 4</p><p class="pdesc">Proxmox OS, Home Assistant VM, and Docker LXC container. Fast random I/O for VM workloads.</p></div>
     <p class="pprice">~$58</p>
   </div>
+
+  <div class="part-row">
+    <div class="picon" style="background:var(--info-bg)">💽</div>
+    <div><p class="plabel">VM NVMe <span class="badge bn">New</span></p><p class="pname">WD Blue SN580 500GB Gen 4</p><p class="pdesc">Dedicated to Windows 11 VM. Isolates Windows I/O from host OS reads/writes — better DaVinci Resolve scratch performance in Phase 2.</p></div>
+    <p class="pprice">~$35</p>
+  </div>
+
   <div class="part-row">
     <div class="picon" style="background:var(--info-bg)">🗄</div>
-    <div><p class="plabel">NAS storage</p><p class="pname">2× Seagate IronWolf 8TB 7200RPM <span class="badge bn">New</span></p><p class="pdesc">NAS-rated for 24/7 operation, 180TB/yr workload. Run in ZFS RAID 1 = 8TB usable with full redundancy. Add a 3rd later for 16TB usable</p></div>
+    <div><p class="plabel">NAS Drives</p><p class="pname">2× Seagate IronWolf 8TB 7200RPM <span class="badge bn">New</span></p><p class="pdesc">NAS-rated, 180TB/yr workload rating, 3-year warranty. ZFS Mirror (RAID-1) = 8TB usable with full redundancy. Expandable to RAID-Z1/Z2 later.</p></div>
     <p class="pprice">~$320</p>
   </div>
+
   <div class="part-row">
     <div class="picon" style="background:var(--info-bg)">⚡</div>
-    <div><p class="plabel">Power supply</p><p class="pname">Corsair RM750x 80+ Gold Fully Modular</p><p class="pdesc">750W gives proper headroom for RTX 4070 Ti Super (285W TDP) + drives + CPU. Gold-rated, fully modular, whisper quiet for 24/7 use</p></div>
+    <div><p class="plabel">Power Supply</p><p class="pname">Corsair RM750x 80+ Gold Fully Modular</p><p class="pdesc">750W sized for Phase 2 RTX 4070 Ti Super (285W TDP). Replacing the PSU later requires full teardown — sized right upfront. Whisper quiet for 24/7 use.</p></div>
     <p class="pprice">~$110</p>
   </div>
+
   <div class="part-row">
     <div class="picon" style="background:var(--info-bg)">📦</div>
-    <div><p class="plabel">Case</p><p class="pname">Fractal Design Focus 2 Mid-Tower ATX</p><p class="pdesc">Supports 6× 3.5" NAS drives and full-length GPUs. Excellent airflow for 24/7 operation</p></div>
-    <p class="pprice">~$70</p>
+    <div><p class="plabel">Case</p><p class="pname">Fractal Define 7 Mid-Tower <span class="badge bw">Upgraded</span></p><p class="pdesc">14× 3.5" drive bays in storage layout vs. Focus 2's 4-bay ceiling. Sound dampened for quiet 24/7 operation. $80 more but removes case as a storage bottleneck for the lifetime of the build.</p></div>
+    <p class="pprice">~$150</p>
   </div>
+
   <div class="part-row">
     <div class="picon" style="background:var(--info-bg)">🌐</div>
-    <div><p class="plabel">Network</p><p class="pname">Intel i225-V 2.5GbE PCIe NIC</p><p class="pdesc">Nearly 3× faster than the onboard 1GbE port for NAS file transfers. Intel chipset for best Linux driver support</p></div>
+    <div><p class="plabel">Network Card</p><p class="pname">Intel i225-V 2.5GbE PCIe NIC</p><p class="pdesc">Dedicated NAS interface — nearly 3× faster than 1GbE for file transfers. Intel chipset has best Linux driver support in Proxmox.</p></div>
     <p class="pprice">~$30</p>
   </div>
+
+  <div class="phase-total"><p class="phase-total-label">Phase 1 Total</p><p class="phase-total-amt">~$1,618</p></div>
+
+  <div class="divider">Phase 1 Accessories (~$44)</div>
+
   <div class="part-row">
-    <div class="picon" style="background:var(--bg2)">🌬</div>
-    <div><p class="plabel">CPU cooler</p><p class="pname">AMD Wraith Stealth (stock) <span class="badge bk">Included</span></p><p class="pdesc">Comes boxed with the 5600/5600X. Adequate for this workload. Upgrade to a Cooler Master Hyper 212 ($25) for quieter 24/7 operation</p></div>
-    <p class="pprice">$0</p>
+    <div class="picon" style="background:var(--bg3)">🔌</div>
+    <div><p class="plabel">Cables</p><p class="pname">SATA III right-angle cables (3-pack)</p><p class="pdesc">Board includes only 1 SATA cable; need 2 for the IronWolf drives.</p></div>
+    <p class="pprice">~$8</p>
   </div>
+  <div class="part-row">
+    <div class="picon" style="background:var(--bg3)">🖲</div>
+    <div><p class="plabel">Installer</p><p class="pname">USB flash drive 16GB+</p><p class="pdesc">Proxmox VE installer bootable USB.</p></div>
+    <p class="pprice">~$8</p>
+  </div>
+  <div class="part-row">
+    <div class="picon" style="background:var(--bg3)">🌬</div>
+    <div><p class="plabel">Maintenance</p><p class="pname">Compressed air</p><p class="pdesc">Drive and fan maintenance.</p></div>
+    <p class="pprice">~$8</p>
+  </div>
+  <div class="part-row">
+    <div class="picon" style="background:var(--bg3)">📺</div>
+    <div><p class="plabel">Display</p><p class="pname">HDMI cable (iGPU to monitor)</p><p class="pdesc">Phase 1 only — iGPU outputs through motherboard HDMI.</p></div>
+    <p class="pprice">~$10</p>
+  </div>
+  <div class="part-row">
+    <div class="picon" style="background:var(--bg3)">🔩</div>
+    <div><p class="plabel">Tools</p><p class="pname">Magnetic screwdriver</p><p class="pdesc">If not already owned.</p></div>
+    <p class="pprice">~$10</p>
+  </div>
+
+  <div class="phase-total"><p class="phase-total-label">Accessories Total</p><p class="phase-total-amt">~$44</p></div>
+
+  <div class="divider">Phase 2 — GPU &amp; Protection (~$792)</div>
+
+  <div class="part-row">
+    <div class="picon" style="background:var(--warn-bg)">🎮</div>
+    <div><p class="plabel">GPU <span class="badge bw">Phase 2 — add when ready</span></p><p class="pname">NVIDIA RTX 4070 Ti Super 16GB</p><p class="pdesc">16GB GDDR6X. CUDA acceleration for DaVinci Resolve and Premiere Pro. Passed through via VFIO to Windows VM for native desktop GPU performance.</p></div>
+    <p class="pprice">~$650</p>
+  </div>
+
+  <div class="part-row">
+    <div class="picon" style="background:var(--warn-bg)">🔋</div>
+    <div><p class="plabel">UPS <span class="badge bw">Phase 2</span></p><p class="pname">APC Back-UPS Pro 1500VA</p><p class="pdesc">Protects ZFS pool and VMs from sudden power loss. Full system draws ~450W peak (GPU load) — 1500VA handles that for 12-15 minutes. Size the UPS once for the full system.</p></div>
+    <p class="pprice">~$130</p>
+  </div>
+
+  <div class="part-row">
+    <div class="picon" style="background:var(--bg3)">🖥</div>
+    <div><p class="plabel">Cable</p><p class="pname">DisplayPort cable (GPU to monitor)</p><p class="pdesc">Replaces HDMI in Phase 2. Move monitor from motherboard HDMI to GPU DisplayPort after passthrough is configured.</p></div>
+    <p class="pprice">~$12</p>
+  </div>
+
+  <div class="phase-total"><p class="phase-total-label">Phase 2 Total</p><p class="phase-total-amt">~$792</p></div>
 
   <div class="total-row">
-    <div><p style="font-size:13px;font-weight:500;color:var(--text2)">Estimated total (excl. CPU)</p><p style="font-size:11px;color:var(--text3);margin-top:2px">Shop Newegg, B&H, Amazon — prices vary</p></div>
-    <p class="total-amount">~$1,398</p>
+    <p class="total-label">Grand Total (Phase 1 + Phase 2)</p>
+    <p class="total-amount">~$2,454</p>
   </div>
-
-  <div class="tip" style="margin-top:12px">Power budget: RTX 4070 Ti Super (285W) + Ryzen 5600 (65W) + 2× IronWolf (18W) + misc = ~450W peak. At 750W the PSU runs at ~60% load — the ideal efficiency range for longevity and quiet operation.</div>
 </div>
 
-<!-- ASSEMBLY -->
+<!-- ══ ASSEMBLY ══ -->
 <div class="section" id="s-assembly">
   <p class="sec-title">Assembly order</p>
-  <p class="sec-sub">Follow this sequence exactly. Work on a clean, static-free surface. Touch bare metal (the PSU case) before handling any component to discharge static. Assemble the CPU, cooler and RAM on the board outside the case first.</p>
+  <p class="sec-sub">Follow this sequence to avoid damage and make installation easier. Work on a static-free surface. Touch bare metal (the PSU case) before handling any component. Assemble CPU and RAM on the motherboard outside the case first.</p>
 
   <div class="step"><div class="sn">1</div><div class="sb">
     <p class="sh">Prep the case</p>
-    <p class="sd">Remove both side panels. Verify ATX standoffs are pre-installed for ATX layout. Remove I/O shield knock-outs for your ports. Lay the case on its side so the motherboard tray faces up.</p>
-    <div class="tip">Set the MSI B550-A PRO box flat on your desk as a work surface — assembling CPU and RAM outside the case is much easier than working inside it.</div>
+    <p class="sd">Remove both side panels from the Fractal Define 7. Verify ATX standoffs are installed for ATX layout. Remove the I/O shield knockout. Set the case on its side so the motherboard tray faces up. Route cables now before components are in.</p>
+    <div class="tip">The Define 7's modular drive cage system is pre-configured for ATX. If you want maximum drive bay access later, leave the bottom 3.5" cage in place and populate from the back.</div>
   </div></div>
 
   <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Install CPU into motherboard</p>
-    <p class="sd">Lift the AM4 ZIF lever fully. Align the gold triangle marker on the Ryzen 5600 with the triangle on the socket corner. Lower the CPU — it drops in with zero force, guided by two notches. Close the lever firmly.</p>
-    <div class="warn-box">Never touch the gold pins on the underside of the CPU. Hold the chip by its edges only. One bent pin can kill the board and the CPU both.</div>
+    <p class="sh">Install CPU into motherboard (outside case)</p>
+    <p class="sd">Lay the MSI B650 Gaming Plus WiFi on its box on a flat surface. Lift the AM5 ZIF lever, align the Ryzen 9 7900 triangle marker to the socket triangle, lower into socket, and close the lever. No force needed — if it doesn't drop in, recheck alignment.</p>
+    <div class="warn-box">AM5 uses a contact-frame design — the CPU pins are on the motherboard socket, not the chip. Do not touch the socket contacts.</div>
   </div></div>
 
   <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Install CPU cooler (Wraith Stealth)</p>
-    <p class="sd">The Wraith Stealth has pre-applied thermal paste — do not add more. Align the four push-pins over the AM4 backplate holes. Press down and twist each clockwise until it clicks. Plug the 4-pin fan cable into CPU_FAN1 — the header nearest the top-center of the board.</p>
-    <div class="tip">Tighten in an X-pattern: top-left → bottom-right → top-right → bottom-left. This spreads pressure evenly across the CPU die and prevents warping the board.</div>
+    <p class="sh">Install CPU cooler (Wraith Prism)</p>
+    <p class="sd">Apply the included thermal paste (or a pea-sized dot of your own). The Wraith Prism ships with AM5 brackets. Align the four mounting screws to the AM5 backplate holes and tighten in a cross pattern. Plug the fan header into CPU_FAN1.</p>
+    <div class="tip">The AM5 mounting holes are the same as AM4. The Wraith Prism included with the Ryzen 9 7900 (non-X) fits directly — no adapter needed.</div>
   </div></div>
 
   <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Install RAM in dual-channel slots</p>
-    <p class="sd">On the MSI B550-A PRO use slots A2 and B2 — the second and fourth slots from the left edge (check silkscreen labeling on the board). This enables dual-channel mode. Press each stick firmly and evenly until both side clips snap in fully.</p>
-    <div class="warn-box">RAM requires more force than expected — around 20–25 lbs per stick. If the side clip doesn't snap, the stick is not fully seated and the system will not POST. Do not skip past this.</div>
+    <p class="sh">Install RAM — DIMM slots A2 and B2</p>
+    <p class="sd">Consult the B650 manual for dual-channel layout — typically slots 2 and 4 (labeled A2/B2). Insert the G.Skill Flare X5 2×32GB sticks into those slots. Press firmly until both side clips lock. DDR5 is notched so it can only go in one direction.</p>
   </div></div>
 
   <div class="step"><div class="sn">5</div><div class="sb">
-    <p class="sh">Install NVMe SSD</p>
-    <p class="sd">Remove the M.2_1 heatsink (closest to the CPU — one screw). Remove the retaining screw at the far end of the slot. Slide the WD SN580 in at a 30° angle, press down flat, and replace the retaining screw. Reinstall the heatsink over the drive on its thermal pad.</p>
-    <div class="tip">Always reinstall the M.2 heatsink. The B550-A PRO's heatsink keeps the NVMe significantly cooler during sustained read/write under Proxmox and video editing workloads.</div>
+    <p class="sh">Install NVMe drives (M.2 slots)</p>
+    <p class="sd">Slot 1 (top M.2, near CPU): WD SN580 1TB — this is the boot/Proxmox drive. Slot 2 (second M.2): WD SN580 500GB — dedicated to Windows VM. Remove the M.2 heatsink, slide the drive in at 30°, lower flat, secure with screw, replace heatsink.</p>
   </div></div>
 
   <div class="step"><div class="sn">6</div><div class="sb">
-    <p class="sh">Install motherboard into case</p>
-    <p class="sd">Press the I/O shield from the motherboard box into the rear of the case — it snaps in with firm pressure. Lower the board into the case aligning the rear ports through the shield. Match screw holes to standoffs. Install all 9 ATX screws with a magnetic screwdriver — snug, not over-torqued. Work center-out.</p>
+    <p class="sh">Seat motherboard in case</p>
+    <p class="sd">Snap the B650's I/O shield into the case opening. Lower the board onto the standoffs, aligning all screw holes. Use 9 screws (ATX layout). Don't overtighten — snug is enough for good contact.</p>
   </div></div>
 
   <div class="step"><div class="sn">7</div><div class="sb">
-    <p class="sh">Install IronWolf drives</p>
-    <p class="sd">Slide the two IronWolf 8TB drives into 3.5" bays 1 and 2. Secure with four screws per drive through the case side rails. Connect SATA data cables to SATA_1 and SATA_2 on the board (the two ports furthest from the GPU slot). Connect SATA power from the PSU.</p>
+    <p class="sh">Install Intel i225-V NIC</p>
+    <p class="sd">Seat into the first available PCIe ×1 slot (avoid blocking the main ×16 GPU slot for Phase 2). Secure the bracket screw. Remove the corresponding I/O slot cover from the Define 7's rear.</p>
   </div></div>
 
   <div class="step"><div class="sn">8</div><div class="sb">
-    <p class="sh">Install PSU</p>
-    <p class="sd">Mount the Corsair RM750x in the PSU shroud at the bottom of the case, fan facing down toward the floor vent. Secure with 4 screws through the rear panel. Attach only the cables you need before the GPU goes in — 24-pin ATX, 8-pin CPU EPS, and two PCIe 8-pin cables for the GPU.</p>
-    <div class="tip">Route cables through the back panel grommets before mounting the GPU. Cable management is much harder with the GPU in place.</div>
+    <p class="sh">Install IronWolf drives (3.5" bays)</p>
+    <p class="sd">Use the Define 7's tool-free drive trays. Slide each IronWolf 8TB into a tray, secure with the rubber-dampened screws on the tray sides, and slide the tray into the cage until it clicks. Connect SATA III cables (right-angle on drive end) to motherboard SATA ports 1 and 2.</p>
   </div></div>
 
-  <div class="step"><div class="sn w">9</div><div class="sb">
-    <p class="sh">Install RTX 4070 Ti Super</p>
-    <p class="sd">Remove the two PCIe slot cover plates from the case rear panel aligned with the top x16 slot. Press the PCIe slot retention clip outward. Align the GPU and press down firmly and evenly until the clip clicks. Screw the bracket into the case. Connect two PCIe 8-pin power cables from the PSU.</p>
-    <div class="warn-box">The RTX 4070 Ti Super requires two 8-pin PCIe power connectors. Never substitute the CPU EPS cable — they look nearly identical but carry different voltages. PCIe cables on the RM750x are clearly labeled.</div>
+  <div class="step"><div class="sn">9</div><div class="sb">
+    <p class="sh">Install PSU (Corsair RM750x)</p>
+    <p class="sd">Mount fan-down in the Define 7's bottom PSU shroud (fan exhausts out the back). Connect cables: 24-pin ATX, 8-pin CPU (EPS), SATA power to both IronWolf drives. Leave GPU power cables aside — not needed until Phase 2. Route all cables through grommets before closing panels.</p>
   </div></div>
 
-  <div class="step"><div class="sn">10</div><div class="sb">
-    <p class="sh">Connect Intel i225-V 2.5GbE NIC</p>
-    <p class="sd">Install the 2.5GbE card in any available PCIe x1 or x4 slot below the GPU. Remove that slot cover, press the card in until the clip clicks, screw the bracket in. Connect your Ethernet cable to this card — not the motherboard's 1GbE port.</p>
-  </div></div>
-
-  <div class="step"><div class="sn">11</div><div class="sb">
-    <p class="sh">Connect front panel headers and close up</p>
-    <p class="sd">The JFP1 header is in the bottom-right of the MSI B550-A PRO. Connect: power switch (no polarity), reset switch (no polarity), power LED (polarity marked), HDD LED. Connect USB 3.0 case header to USB3_1, HD Audio to JAUD1. Do a final cable inspection — no wires near fans. Connect monitor to the RTX 4070 Ti Super's DisplayPort output.</p>
-    <div class="tip">The MSI EZ Debug LEDs (CPU, DRAM, VGA, BOOT near the top-right of the board) show exactly which component is causing a problem if the system doesn't POST on first boot.</div>
+  <div class="step"><div class="sn ok">✓</div><div class="sb">
+    <p class="sh">Final cable check &amp; panel close</p>
+    <p class="sd">Verify: 24-pin ATX, CPU 8-pin, both SATA power, both SATA data, front panel headers (PWR, RST, HDD LED, USB, audio), CPU FAN header. Tuck cables behind the tray. Reinstall both side panels. Connect HDMI from motherboard HDMI port to monitor.</p>
   </div></div>
 </div>
 
-<!-- PRE-BOOT CHECKLIST -->
+<!-- ══ PRE-BOOT CHECKLIST ══ -->
 <div class="section" id="s-checklist">
   <p class="sec-title">Pre-boot checklist</p>
-  <p class="sec-sub">Run through every item before pressing the power button. Check each one off as you physically confirm it.</p>
-  <p style="font-size:12px;color:var(--text2);margin-bottom:5px" id="cl-label">0 of 13 confirmed</p>
-  <div class="prog-track"><div class="prog-fill" id="cl-fill" style="width:0%"></div></div>
-  <div id="cl-items">
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">24-pin ATX power connector fully seated in motherboard — no gaps, all clips locked</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">8-pin CPU EPS power connector fully seated at top-left of board (labeled CPU_PWR1)</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">Two PCIe 8-pin power cables connected to RTX 4070 Ti Super (labeled PCIe on RM750x)</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">GPU seated fully in PCIe x16 slot — retention clip clicked, bracket screwed to case</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">RAM sticks in slots A2 and B2 — both clips fully snapped on both sides of each stick</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">NVMe SSD retaining screw installed and M.2 heatsink replaced and secured</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">Both IronWolf drives seated, screwed in, SATA data and power cables connected</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">CPU cooler fan header connected to CPU_FAN1 on the motherboard</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">Front panel power button header connected to JFP1 (bottom-right of board)</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">Monitor connected to RTX 4070 Ti Super DisplayPort — not the motherboard I/O panel</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">Ethernet connected to Intel i225-V NIC — not the motherboard LAN port</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">No loose screws or tools inside the case, no cables near fan blades</span></label>
-    <label class="chk-row"><input type="checkbox" onchange="clTick()"><span class="chk-label">PSU rear switch set to ON ( | ) — not the O position</span></label>
+  <p class="sec-sub">Complete all checks before powering on for the first time. Click each item to mark it done.</p>
+
+  <div class="prog-wrap">
+    <p class="prog-label" id="prog-label">0 of 14 completed</p>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
   </div>
-  <div class="done-box" id="cl-done">
+
+  <div class="divider">Hardware</div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">CPU seated fully — AM5 lever closed, no bent socket pins</p></div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">Wraith Prism cooler fully mounted — all 4 screws snug, fan header connected to CPU_FAN1</p></div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">RAM in dual-channel slots A2 + B2 — both side clips locked</p></div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">Both NVMe drives seated and heatsinks replaced</p></div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">Both IronWolf drives in trays, SATA data cables connected to board SATA 1 &amp; 2</p></div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">Intel i225-V NIC seated in PCIe slot, bracket screw secured</p></div>
+
+  <div class="divider">Power &amp; Cables</div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">24-pin ATX fully seated</p></div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">CPU 8-pin EPS power connected</p></div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">SATA power to both IronWolf drives</p></div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">Front panel headers connected (power, reset, LEDs, USB, audio)</p></div>
+
+  <div class="divider">First Boot</div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">HDMI cable from motherboard HDMI port to monitor (iGPU — NOT a dedicated GPU slot)</p></div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">Proxmox ISO written to USB drive (use Rufus or balenaEtcher, DD mode)</p></div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">USB drive inserted — ready to boot installer</p></div>
+  <div class="chk-row" onclick="toggleCheck(this)"><input type="checkbox"><p class="chk-label">PSU switch ON — power button POST test</p></div>
+
+  <div class="done-box" id="done-box">
     <p>All checks complete</p>
-    <p>Press the power button. Watch for the MSI logo screen, then press Delete to enter BIOS.</p>
+    <p>Ready to boot the Proxmox installer. Press power, hit Del/F2 to enter BIOS first.</p>
   </div>
 </div>
 
-<!-- BIOS -->
+<!-- ══ BIOS SETTINGS ══ -->
 <div class="section" id="s-bios">
   <p class="sec-title">BIOS settings</p>
-  <p class="sec-sub">Press Delete repeatedly on boot to enter BIOS. Press F7 to switch to Advanced Mode. Make all changes below in order, then press F10 to save and restart.</p>
+  <p class="sec-sub">MSI B650 Gaming Plus WiFi — apply these settings before Proxmox installation. Enter BIOS by pressing Del or F2 during POST. Press F7 for Advanced Mode.</p>
 
-  <div class="bcard"><p class="bpath">OC → Memory → XMP</p><p class="bname">Enable A-XMP Profile</p><p class="bval">Set to <strong>Profile 1</strong> — unlocks DDR4 to its rated 3200 MHz speed. Without this it defaults to 2133 MHz, a significant performance penalty for everything running on this machine.</p></div>
-  <div class="bcard"><p class="bpath">Settings → Advanced → PCI Subsystem</p><p class="bname">Above 4G Decoding</p><p class="bval">Set to <strong>Enabled</strong> — required for the RTX 4070 Ti Super to access all 16GB of VRAM properly. Also needed for Proxmox GPU passthrough to work correctly.</p></div>
-  <div class="bcard"><p class="bpath">Settings → Advanced → PCI Subsystem</p><p class="bname">Re-Size BAR Support</p><p class="bval">Set to <strong>Enabled</strong> — allows the CPU to access the full GPU frame buffer at once. Measurable performance boost in rendering, viewport work and video encoding.</p></div>
-  <div class="bcard"><p class="bpath">Settings → Advanced → AMD CBS → CPU Common Options</p><p class="bname">Global C-State Control</p><p class="bval">Set to <strong>Enabled</strong> — allows the CPU to idle down efficiently when not under load. Important for a 24/7 machine — reduces heat and electricity consumption at idle.</p></div>
-  <div class="bcard"><p class="bpath">Settings → System → Windows OS Configuration</p><p class="bname">BIOS UEFI / CSM Support</p><p class="bval">Set to <strong>UEFI</strong> — required for NVMe boot drives to operate at full speed and for Proxmox UEFI VMs (needed for Windows 11 and GPU passthrough).</p></div>
-  <div class="bcard"><p class="bpath">Settings → Advanced → ACPI Settings</p><p class="bname">BIOS ACPI Sleep State</p><p class="bval">Set to <strong>S3 (Suspend to RAM)</strong> if you want the machine to sleep when not in use. Set to <strong>Disabled</strong> if running as a 24/7 server — prevents the host from sleeping while VMs are running.</p></div>
-  <div class="bcard"><p class="bpath">Boot</p><p class="bname">Boot Device Priority</p><p class="bval">When installing Proxmox: set USB as <strong>first</strong>. After Proxmox install: set WD SN580 NVMe as <strong>first</strong> and remove USB from the list. Do this before the IronWolf drives show up as boot candidates.</p></div>
+  <div class="divider">CPU &amp; Memory</div>
 
-  <div class="tip" style="margin-top:16px">After all changes press F10 → Save and Exit. The system restarts. If the display comes on and fans spin normally, hardware is good. Proceed to flash the Proxmox USB installer.</div>
-  <div class="warn-box" style="margin-top:8px">If no display after POST — check EZ Debug LEDs on the board. DRAM lit = reseat RAM sticks. VGA lit = reseat GPU or check PCIe power cables. CPU lit = recheck 8-pin EPS cable and cooler mounting.</div>
+  <div class="bcard">
+    <p class="bpath">OC › Memory → XMP/EXPO</p>
+    <p class="bname">Enable XMP / EXPO Profile</p>
+    <p class="bval">Set to <strong>EXPO Profile 1</strong>. This enables the G.Skill Flare X5 at DDR5-6000 CL36 as rated. Without this, RAM runs at DDR5-4800 (JEDEC default).</p>
+  </div>
+
+  <div class="bcard">
+    <p class="bpath">Settings › Advanced › CPU Configuration</p>
+    <p class="bname">SVM Mode (Virtualization)</p>
+    <p class="bval">Set to <strong>Enabled</strong>. Required for Proxmox KVM hypervisor.</p>
+  </div>
+
+  <div class="bcard">
+    <p class="bpath">Settings › Advanced › Integrated Graphics Configuration</p>
+    <p class="bname">Initiate Graphic Adapter</p>
+    <p class="bval">Set to <strong>iGPU</strong>. This ensures Proxmox outputs display through the motherboard HDMI permanently, leaving the PCIe slot entirely for the Phase 2 GPU passthrough.</p>
+  </div>
+
+  <div class="divider">PCIe &amp; IOMMU</div>
+
+  <div class="bcard">
+    <p class="bpath">Settings › Advanced › PCI Subsystem Settings</p>
+    <p class="bname">Above 4G Memory / Crypto Currency Mining</p>
+    <p class="bval">Set to <strong>Enabled</strong>. Required for GPU passthrough in Phase 2 (Above 4G Decoding).</p>
+  </div>
+
+  <div class="bcard">
+    <p class="bpath">Settings › Advanced › PCI Subsystem Settings</p>
+    <p class="bname">Re-Size BAR Support</p>
+    <p class="bval">Set to <strong>Enabled</strong>. Enables Resizable BAR (ReBAR) — the RTX 4070 Ti Super supports this and gains performance benefit.</p>
+  </div>
+
+  <div class="bcard">
+    <p class="bpath">Settings › Advanced › AMD CBS › NBIO Common Options</p>
+    <p class="bname">IOMMU</p>
+    <p class="bval">Set to <strong>Enabled</strong>. Required for VFIO GPU passthrough. Must be set in BIOS before enabling in GRUB.</p>
+  </div>
+
+  <div class="divider">Power &amp; Storage</div>
+
+  <div class="bcard">
+    <p class="bpath">Settings › Advanced › Power Management</p>
+    <p class="bname">Restore on AC Power Loss</p>
+    <p class="bval">Set to <strong>Power On</strong>. Proxmox server should auto-restart after power outage (even with UPS, belt-and-suspenders).</p>
+  </div>
+
+  <div class="bcard">
+    <p class="bpath">Settings › Advanced › SATA Configuration</p>
+    <p class="bname">SATA Mode</p>
+    <p class="bval">Verify <strong>AHCI</strong>. NVMe drives are unaffected; IronWolf SATA drives need AHCI for Proxmox detection.</p>
+  </div>
+
+  <div class="tip">After saving BIOS settings (F10), boot from the Proxmox USB installer. The two NVMe drives and two IronWolf drives should all appear in the installer.</div>
 </div>
 
-<!-- SOLIDWORKS GPU -->
-<div class="section" id="s-solidworks">
-  <p class="sec-title">SolidWorks GPU configuration</p>
-  <p class="sec-sub">If you use SolidWorks inside the Windows VM, configure these settings after Windows and NVIDIA drivers are installed. The RTX 4070 Ti Super is not on NVIDIA's certified SolidWorks list but performs excellently with this setup.</p>
+<!-- ══ IOMMU & VFIO ══ -->
+<div class="section" id="s-iommu">
+  <p class="sec-title">IOMMU &amp; VFIO prep</p>
+  <p class="sec-sub">Configure IOMMU and VFIO modules in Phase 1 — before the GPU arrives. There's no harm in doing this without a GPU installed, and it saves a reboot cycle when Phase 2 hardware arrives.</p>
 
   <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Install NVIDIA Studio Driver</p>
-    <p class="sd">Download from nvidia.com → GeForce → RTX 4070 Ti Super → your Windows version. Select Studio Driver (not Game Ready). During installation choose Custom Install → Clean Install.</p>
-    <div class="tip">Studio drivers are optimized for workstation applications including SolidWorks, DaVinci Resolve and Premiere Pro. They have significantly fewer rendering artifacts in CAD viewports than Game Ready drivers.</div>
-  </div></div>
+    <p class="sh">Enable IOMMU in GRUB</p>
+    <p class="sd">Edit the GRUB configuration to pass <span class="ic">amd_iommu=on</span> and <span class="ic">iommu=pt</span> to the kernel on every boot.</p>
+    <p class="fh">/etc/default/grub</p>
+    <p class="fb"><span class="cm"># Find this line and update it:</span>
+GRUB_CMDLINE_LINUX_DEFAULT=<span class="vl">"quiet amd_iommu=on iommu=pt"</span>
 
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Force SolidWorks to use the RTX 4070 Ti Super</p>
-    <p class="sd">NVIDIA Control Panel → Manage 3D Settings → Program Settings → Add → browse to <span class="ic">sldworks.exe</span> at <span class="ic">C:\Program Files\SOLIDWORKS Corp\SOLIDWORKS\</span>. Set Preferred graphics processor to your RTX 4070 Ti Super. Save.</p>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Enable hardware acceleration in SolidWorks</p>
-    <p class="sd">Tools → Options → System Options → Performance: confirm "Use software OpenGL" is unchecked. Tools → Options → System Options → Display: set image quality to balanced (not maximum — maximum tanks frame rate on complex assemblies).</p>
-  </div></div>
-
-  <div class="step"><div class="sn w">4</div><div class="sb">
-    <p class="sh">Suppress the unsupported GPU warning</p>
-    <p class="sd">Create a system environment variable: Windows Search → Environment Variables → System Variables → New.</p>
-    <div class="cb">Variable name:  SOLIDWORKS_USE_GPU_RENDERING
-Variable value: 1</div>
-    <p class="sd">Restart SolidWorks after saving. This removes the startup warning and enables smoother viewport rendering.</p>
-  </div></div>
-
-  <div class="step"><div class="sn ok">5</div><div class="sb">
-    <p class="sh">Recommended performance settings</p>
-    <div class="cb">Tools → Options → Performance:
-✓  Automatically load components lightweight: ON
-✓  Use shaded mode for assemblies over 250 components
-✓  Dynamic highlight from graphics view: ON
-✗  Verify Z-buffer depth on every open: OFF
-✓  Level of detail: Enabled</div>
-  </div></div>
-</div>
-
-<!-- PROXMOX INSTALL -->
-<div class="section" id="s-proxmox">
-  <p class="sec-title">Proxmox VE — installation</p>
-  <p class="sec-sub">Proxmox runs directly on the bare metal NVMe SSD. All other systems — Windows, Home Assistant, Docker — run as VMs or containers inside it. One web UI manages everything.</p>
-
-  <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Download and flash Proxmox VE</p>
-    <p class="sd">Download the latest Proxmox VE ISO from proxmox.com/downloads. Flash to a USB drive using Rufus (Windows) — select DD mode, not ISO mode. Minimum 8GB USB.</p>
-    <div class="tip">As of 2026, Proxmox VE 8.x is current. Get the VE edition — not Proxmox Backup Server.</div>
-  </div></div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Boot and run the installer</p>
-    <p class="sd">Press Delete on boot → set USB as first boot device → save and restart. Select "Install Proxmox VE (Graphical)" from the boot menu.</p>
-    <div class="warn-box">At the disk selection screen choose your WD SN580 NVMe — not the IronWolf drives. Confirm the size shown matches your 1TB NVMe before proceeding.</div>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Filesystem and disk settings</p>
-    <p class="sd">At the disk setup screen click Options. Set filesystem to <span class="ic">ext4</span> — simple and reliable for the OS disk. Leave hdsize at default. The installer creates boot, swap and root partitions automatically.</p>
-    <div class="tip">Save ZFS for the IronWolf NAS pool, not the boot disk. ZFS on the boot disk adds complexity and is not needed here.</div>
-  </div></div>
-
-  <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Network, hostname and passwords</p>
-    <p class="sd">Set a static management IP: <span class="ic">192.168.1.10</span>. Set hostname: <span class="ic">pve.local</span>. Set a strong root password and an email address for alerts. Confirm your 2.5GbE NIC is selected as the management interface.</p>
-  </div></div>
-
-  <div class="step"><div class="sn">5</div><div class="sb">
-    <p class="sh">First login and community repo setup</p>
-    <p class="sd">After install, remove USB and reboot. From any browser go to <span class="ic">https://192.168.1.10:8006</span>. Log in as <span class="ic">root</span>. Dismiss the "No valid subscription" popup. Then in Node → Shell:</p>
-    <div class="cb">sed -i 's/^deb/#deb/' /etc/apt/sources.list.d/pve-enterprise.list
-echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" \
-  > /etc/apt/sources.list.d/pve-community.list
-apt update && apt dist-upgrade -y
-reboot</div>
-  </div></div>
-
-  <div class="step"><div class="sn">6</div><div class="sb">
-    <p class="sh">Enable IOMMU for GPU passthrough</p>
-    <p class="sd">Do this before creating any VMs. In the Proxmox shell:</p>
-    <div class="cb">nano /etc/default/grub
-<span class="cm"># Change GRUB_CMDLINE_LINUX_DEFAULT to:</span>
-GRUB_CMDLINE_LINUX_DEFAULT="quiet amd_iommu=on iommu=pt"
-
+<span class="cm"># Then update grub and reboot:</span>
 update-grub
-echo "vfio" >> /etc/modules
-echo "vfio_iommu_type1" >> /etc/modules
-echo "vfio_pci" >> /etc/modules
+reboot</p>
+  </div></div>
+
+  <div class="step"><div class="sn">2</div><div class="sb">
+    <p class="sh">Load VFIO kernel modules</p>
+    <p class="sd">Add all four VFIO modules to <span class="ic">/etc/modules</span> so they load at every boot. This prepares the system to claim the GPU from the host when Phase 2 hardware is installed.</p>
+    <p class="fh">/etc/modules — append these lines</p>
+    <p class="fb">vfio
+vfio_iommu_type1
+vfio_pci
+vfio_virqfd</p>
+    <div class="cb">echo "vfio
+vfio_iommu_type1
+vfio_pci
+vfio_virqfd" >> /etc/modules
+
+update-initramfs -u -k all</div>
+  </div></div>
+
+  <div class="step"><div class="sn">3</div><div class="sb">
+    <p class="sh">Verify IOMMU groups (after reboot)</p>
+    <p class="sd">Run this script to confirm IOMMU is active and groups are isolated. Each GPU function should appear in its own group.</p>
+    <div class="cb">#!/bin/bash
+<span class="cm"># Check IOMMU groups — run after reboot</span>
+for d in /sys/kernel/iommu_groups/*/devices/*; do
+  n=${d#*/iommu_groups/*}; n=${n%%/*}
+  printf 'IOMMU Group %s ' "$n"
+  lspci -nns "${d##*/}"
+done</div>
+    <div class="tip">Look for the RTX 4070 Ti Super entries (when installed in Phase 2) each in their own group. If the GPU shares a group with other critical devices, you may need ACS override — but B650 + Ryzen 9 7900 typically produces clean isolation.</div>
+  </div></div>
+
+  <div class="step"><div class="sn">4</div><div class="sb">
+    <p class="sh">Blacklist NVIDIA GPU from Proxmox host (Phase 2)</p>
+    <p class="sd">After installing the RTX 4070 Ti Super, prevent Proxmox from loading NVIDIA drivers so VFIO can claim the card exclusively.</p>
+    <div class="cb"><span class="cm"># Get GPU PCI IDs</span>
+lspci -nn | grep -i nvidia
+<span class="cm"># Note the IDs in format [10de:xxxx] — add both GPU and audio function</span>
+
+<span class="cm"># Create VFIO config file</span>
+cat > /etc/modprobe.d/vfio.conf << 'EOF'
+options vfio-pci ids=10de:2782,10de:22bc
+<span class="cm"># Replace 2782,22bc with your actual GPU and audio IDs</span>
+EOF
+
+<span class="cm"># Blacklist nouveau and nvidia from host</span>
+cat > /etc/modprobe.d/blacklist-nvidia.conf << 'EOF'
+blacklist nouveau
+blacklist nvidia
+blacklist nvidiafb
+EOF
+
 update-initramfs -u -k all
 reboot</div>
   </div></div>
+</div>
 
-  <div class="step"><div class="sn">7</div><div class="sb">
-    <p class="sh">Create the ZFS mirror pool (IronWolf drives)</p>
-    <p class="sd">Proxmox web UI → Node → Disks → ZFS → Create ZFS. Select both IronWolf drives. RAID Level: Mirror. Compression: lz4. Name: <span class="ic">datapool</span>. Or via the full CLI setup covered in the ZFS section.</p>
+<!-- ══ PROXMOX INSTALL ══ -->
+<div class="section" id="s-proxmox">
+  <p class="sec-title">Proxmox VE install</p>
+  <p class="sec-sub">Proxmox VE 8.x on the WD SN580 1TB NVMe. The 500GB NVMe will be used as the Windows VM disk and is left unformatted by the installer.</p>
+
+  <div class="step"><div class="sn">1</div><div class="sb">
+    <p class="sh">Run the Proxmox installer</p>
+    <p class="sd">Boot from the Proxmox USB. Choose <strong>Graphical Install</strong>. Target disk: the 1TB NVMe. Set ZFS RAID0 on the single 1TB drive (not a ZFS mirror — NAS redundancy is handled separately by the IronWolf pool). Set hostname, IP, and gateway.</p>
+    <div class="tip">Recommended static IP for Proxmox host: <span class="ic">192.168.1.10</span> — matches the network plan in this guide.</div>
   </div></div>
 
-  <div class="step"><div class="sn ok">8</div><div class="sb">
-    <p class="sh">Verify IOMMU groups for GPU</p>
-    <div class="cb">find /sys/kernel/iommu_groups/ -type l | sort -V | head -40
-<span class="cm"># Your RTX 4070 Ti Super should appear in its own group</span>
-<span class="cm"># If it shares a group with other devices, passthrough may need ACS override</span>
+  <div class="step"><div class="sn">2</div><div class="sb">
+    <p class="sh">Post-install: disable enterprise repo, enable community repo</p>
+    <p class="sd">The enterprise repo requires a paid subscription. Switch to the community (no-subscription) repo to get updates.</p>
+    <div class="cb"><span class="cm"># Disable enterprise repo</span>
+sed -i 's/^deb/#deb/' /etc/apt/sources.list.d/pve-enterprise.list
+sed -i 's/^deb/#deb/' /etc/apt/sources.list.d/ceph.list
 
-lspci -nn | grep -i nvidia
-<span class="cm"># Note both hex IDs: VGA [10de:XXXX] and Audio [10de:XXXX]</span></div>
+<span class="cm"># Add no-subscription repo</span>
+echo "deb http://download.proxmox.com/debian/pve bookworm pve-no-subscription" \
+  > /etc/apt/sources.list.d/pve-no-sub.list
+
+<span class="cm"># Update</span>
+apt update && apt dist-upgrade -y</div>
+  </div></div>
+
+  <div class="step"><div class="sn">3</div><div class="sb">
+    <p class="sh">Add 500GB NVMe as VM storage</p>
+    <p class="sd">The Windows VM NVMe (500GB) is not part of the Proxmox OS install. Add it as a raw LVM volume for VM disk use.</p>
+    <div class="cb"><span class="cm"># Identify the 500GB NVMe device (usually /dev/nvme1n1)</span>
+lsblk
+
+<span class="cm"># Create LVM volume group on it</span>
+pvcreate /dev/nvme1n1
+vgcreate vg-vm /dev/nvme1n1
+
+<span class="cm"># In the Proxmox web UI:</span>
+<span class="cm"># Datacenter → Storage → Add → LVM → ID: vm-nvme, Volume Group: vg-vm</span></div>
+  </div></div>
+
+  <div class="step"><div class="sn">4</div><div class="sb">
+    <p class="sh">Add IronWolf drives as ZFS pool storage</p>
+    <p class="sd">In the Proxmox web UI, navigate to: <strong>Datacenter → &lt;hostname&gt; → Disks → ZFS → Create ZFS</strong>. RAID level: Mirror. Select both IronWolf drives.</p>
+    <div class="cb"><span class="cm"># Alternatively via CLI — identify drive identifiers first</span>
+lsblk -o NAME,SIZE,MODEL | grep -i seagate
+
+<span class="cm"># Create the ZFS mirror pool (replace sdX with actual device letters)</span>
+zpool create -f datapool mirror /dev/sda /dev/sdb
+
+<span class="cm"># Verify pool health</span>
+zpool status datapool
+
+<span class="cm"># In Proxmox web UI, add as storage:</span>
+<span class="cm"># Datacenter → Storage → Add → ZFS → ID: datapool, Pool: datapool</span></div>
+    <div class="tip">Use <span class="ic">/dev/disk/by-id/</span> paths rather than <span class="ic">/dev/sda</span> for ZFS pools — drive letters can shift across reboots. Run <span class="ic">ls /dev/disk/by-id/ | grep -v part</span> to find them.</div>
   </div></div>
 </div>
 
-<!-- VM LAYOUT -->
+<!-- ══ VM LAYOUT ══ -->
 <div class="section" id="s-vmlayout">
-  <p class="sec-title">VM and container layout</p>
-  <p class="sec-sub">Your Ryzen 5 5600 has 6 cores / 12 threads and 32GB RAM. Here is how to divide those resources so everything runs well simultaneously. Proxmox's scheduler shares CPU cores dynamically — allocations are soft ceilings, not reservations.</p>
+  <p class="sec-title">VM &amp; Container layout</p>
+  <p class="sec-sub">Ryzen 9 7900 has 12 cores / 24 threads and 64GB DDR5. The allocation below reserves 2 cores and ~18GB RAM for the Proxmox host and ZFS ARC read cache.</p>
 
   <div class="vmcard">
-    <p class="vmtitle">VM 100 — Windows 11 Desktop <span class="badge bn">VM</span></p>
-    <p class="vmtype">Primary desktop, video editing workstation</p>
+    <p class="vmtitle">VM 100 — Windows 11</p>
+    <p class="vmtype">KVM Virtual Machine · Machine: q35 · BIOS: OVMF (UEFI)</p>
     <div class="vmgrid">
-      <div class="vmstat"><p class="vslab">CPU cores</p><p class="vsval">6 (host passthrough)</p></div>
-      <div class="vmstat"><p class="vslab">RAM</p><p class="vsval">20 GB</p></div>
-      <div class="vmstat"><p class="vslab">Disk</p><p class="vsval">200 GB on NVMe</p></div>
-      <div class="vmstat"><p class="vslab">GPU</p><p class="vsval">RTX 4070 Ti Super (passthrough)</p></div>
+      <div class="vmstat"><p class="vslab">CPU</p><p class="vsval">8 cores (host passthrough)</p></div>
+      <div class="vmstat"><p class="vslab">RAM</p><p class="vsval">32 GB</p></div>
+      <div class="vmstat"><p class="vslab">Storage</p><p class="vsval">200GB on vm-nvme (500GB NVMe)</p></div>
+      <div class="vmstat"><p class="vslab">IP</p><p class="vsval">192.168.1.11</p></div>
     </div>
-    <p class="vmdesc">Machine type: q35. BIOS: OVMF (UEFI). CPU type: host. Pass through the GPU and its HDMI audio device. Install VirtIO drivers for disk and network performance. This VM gets the bulk of resources — it's your primary working environment.</p>
+    <p class="vmdesc">Desktop workstation and video editing. GPU passthrough in Phase 2 (RTX 4070 Ti Super). Install Windows first without GPU — Phase 2 just adds one PCI device and NVIDIA Studio Drivers.</p>
   </div>
 
   <div class="vmcard">
-    <p class="vmtitle">VM 101 — Home Assistant OS <span class="badge bn">VM</span></p>
-    <p class="vmtype">Home automation hub — runs 24/7</p>
+    <p class="vmtitle">VM 101 — Home Assistant OS</p>
+    <p class="vmtype">KVM Virtual Machine · Machine: q35 · BIOS: OVMF (UEFI)</p>
     <div class="vmgrid">
-      <div class="vmstat"><p class="vslab">CPU cores</p><p class="vsval">2</p></div>
-      <div class="vmstat"><p class="vslab">RAM</p><p class="vsval">4 GB</p></div>
-      <div class="vmstat"><p class="vslab">Disk</p><p class="vsval">64 GB on NVMe</p></div>
-      <div class="vmstat"><p class="vslab">Network</p><p class="vsval">VirtIO, bridged to LAN</p></div>
-    </div>
-    <p class="vmdesc">Use the official HAOS QEMU .qcow2 image imported directly into Proxmox. Full Supervisor and add-on access. Runs at near-zero resource usage at idle — no impact on Windows VM performance.</p>
-  </div>
-
-  <div class="vmcard">
-    <p class="vmtitle">CT 200 — Debian LXC Container <span class="badge bk">Container</span></p>
-    <p class="vmtype">Docker host — NAS file sharing, self-hosted apps</p>
-    <div class="vmgrid">
-      <div class="vmstat"><p class="vslab">CPU cores</p><p class="vsval">4</p></div>
+      <div class="vmstat"><p class="vslab">CPU</p><p class="vsval">2 cores</p></div>
       <div class="vmstat"><p class="vslab">RAM</p><p class="vsval">6 GB</p></div>
-      <div class="vmstat"><p class="vslab">Disk</p><p class="vsval">50 GB NVMe + datapool</p></div>
-      <div class="vmstat"><p class="vslab">Type</p><p class="vsval">Unprivileged LXC</p></div>
+      <div class="vmstat"><p class="vslab">Storage</p><p class="vsval">64GB on local-lvm (1TB NVMe)</p></div>
+      <div class="vmstat"><p class="vslab">IP</p><p class="vsval">192.168.1.30</p></div>
     </div>
-    <p class="vmdesc">Runs Docker Compose for Nginx Proxy Manager, Jellyfin, Duplicati, Portainer and Samba file shares. The ZFS datapool is bind-mounted directly into this container — full NAS speed with no network overhead.</p>
-    <div class="tip" style="margin-top:8px">LXC containers share the host kernel — they use far less RAM overhead than full VMs and start in under a second. Perfect for always-on services.</div>
+    <p class="vmdesc">Home automation hub — runs 24/7. Full HAOS with Supervisor, add-ons, Zigbee2MQTT. Uses the official HAOS disk image imported directly into Proxmox.</p>
   </div>
 
-  <div class="divider">Resource allocation</div>
-  <div style="margin-bottom:4px"><span style="font-size:12px;color:var(--text2)">RAM — 30 GB allocated of 32 GB (2 GB reserved for Proxmox host)</span></div>
-  <div class="pbar"><div class="pfill" style="width:94%;background:var(--warn)"></div></div>
-  <p style="font-size:11px;color:var(--text3);margin-bottom:12px">Proxmox memory ballooning means VMs only consume RAM they're actively using. In practice total usage is well under 20 GB when Windows is idle.</p>
+  <div class="vmcard">
+    <p class="vmtitle">CT 200 — Debian LXC (Docker host)</p>
+    <p class="vmtype">LXC Container · Unprivileged · Nesting enabled</p>
+    <div class="vmgrid">
+      <div class="vmstat"><p class="vslab">CPU</p><p class="vsval">4 cores</p></div>
+      <div class="vmstat"><p class="vslab">RAM</p><p class="vsval">8 GB</p></div>
+      <div class="vmstat"><p class="vslab">Storage</p><p class="vsval">50GB local-lvm + datapool mount</p></div>
+      <div class="vmstat"><p class="vslab">IP</p><p class="vsval">192.168.1.20</p></div>
+    </div>
+    <p class="vmdesc">Docker host for Jellyfin (media server), Nginx Proxy Manager, Duplicati (backups), and Portainer (Docker UI). Also serves Samba and NFS shares from the ZFS datapool.</p>
+  </div>
 </div>
 
-<!-- GPU PASSTHROUGH -->
+<!-- ══ GPU PASSTHROUGH ══ -->
 <div class="section" id="s-gpupass">
-  <p class="sec-title">GPU passthrough — RTX 4070 Ti Super</p>
-  <p class="sec-sub">GPU passthrough gives the Windows VM direct native access to the RTX 4070 Ti Super — identical performance to bare metal. Required: IOMMU enabled in Proxmox install section first.</p>
+  <p class="sec-title">GPU passthrough (Phase 2)</p>
+  <p class="sec-sub">Complete IOMMU/VFIO prep in Phase 1 first (see IOMMU &amp; VFIO section). When the RTX 4070 Ti Super arrives, complete these steps in order.</p>
 
   <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Blacklist the GPU from the Proxmox host</p>
-    <div class="cb"><span class="cm"># Find GPU PCI IDs</span>
+    <p class="sh">Seat GPU and connect power cables</p>
+    <p class="sd">Install RTX 4070 Ti Super in the primary PCIe ×16 slot. Connect two PCIe 8-pin power cables from the RM750x (labeled PCIe). Do not connect the DisplayPort cable yet.</p>
+  </div></div>
+
+  <div class="step"><div class="sn">2</div><div class="sb">
+    <p class="sh">Confirm BIOS settings</p>
+    <p class="sd">Verify Above 4G Decoding = Enabled, ReBAR = Enabled, iGPU as primary (so Proxmox console stays on motherboard HDMI).</p>
+  </div></div>
+
+  <div class="step"><div class="sn">3</div><div class="sb">
+    <p class="sh">Blacklist NVIDIA from Proxmox host</p>
+    <p class="sd">Get the GPU PCI IDs and configure VFIO to claim the card (see IOMMU &amp; VFIO section — Step 4).</p>
+    <div class="cb"><span class="cm"># Get actual GPU + audio IDs</span>
 lspci -nn | grep -i nvidia
-<span class="cm"># e.g. 09:00.0 VGA [10de:2782]  09:00.1 Audio [10de:22bc]</span>
+<span class="cm"># Example output:</span>
+<span class="cm"># 01:00.0 VGA [0300]: NVIDIA ... RTX 4070 Ti Super [10de:2782]</span>
+<span class="cm"># 01:00.1 Audio [0403]: NVIDIA ... [10de:22bc]</span>
 
+<span class="cm"># Update /etc/modprobe.d/vfio.conf with your actual IDs:</span>
 echo "options vfio-pci ids=10de:2782,10de:22bc" > /etc/modprobe.d/vfio.conf
-echo "blacklist nouveau" >> /etc/modprobe.d/blacklist.conf
-echo "blacklist nvidia" >> /etc/modprobe.d/blacklist.conf
-update-initramfs -u -k all
-reboot</div>
-    <div class="warn-box">Replace 10de:2782 and 10de:22bc with your actual GPU PCI IDs from lspci output above.</div>
-  </div></div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Create Windows 11 VM with correct settings</p>
-    <div class="cb"><span class="ky">Machine:</span>      q35
-<span class="ky">BIOS:</span>         OVMF (UEFI)
-<span class="ky">CPU Type:</span>     host
-<span class="ky">CPU Cores:</span>    6
-<span class="ky">RAM:</span>          20480 MB
-<span class="ky">Disk:</span>         200 GB, VirtIO SCSI, on local-lvm
-<span class="ky">Network:</span>      VirtIO, bridge vmbr0
-<span class="ky">Display:</span>      Default (VGA) during install — change later</div>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Add GPU PCI device to the VM</p>
-    <p class="sd">VM Hardware tab → Add → PCI Device → select the RTX 4070 Ti Super VGA entry. Enable:</p>
-    <div class="cb">✓  All Functions   (passes GPU + HDMI audio together)
-✓  ROM-Bar
-✓  PCI-Express
-✗  Primary GPU   (enable this AFTER Windows is fully set up)</div>
+update-initramfs -u -k all && reboot</div>
   </div></div>
 
   <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Install Windows and NVIDIA drivers</p>
-    <p class="sd">Boot VM from a Windows 11 ISO (upload to Proxmox local storage first). Attach the VirtIO driver ISO too — Windows won't see the VirtIO disk without it. Install Windows normally. Once on the desktop: install VirtIO guest tools, then NVIDIA Studio Driver. The GPU should appear in Device Manager.</p>
-    <div class="tip">Connect your monitor to the RTX 4070 Ti Super DisplayPort before starting the VM. Once NVIDIA drivers install, output switches from the virtual Proxmox display to the physical GPU.</div>
-  </div></div>
-
-  <div class="step"><div class="sn ok">5</div><div class="sb">
-    <p class="sh">Hide hypervisor from NVIDIA driver (if needed)</p>
-    <p class="sd">If you see "NVIDIA Installer cannot continue" or Error 43 in Device Manager:</p>
-    <div class="cb">nano /etc/pve/qemu-server/100.conf
-<span class="cm"># Add this line:</span>
-args: -cpu 'host,+kvm_pv_unhalt,+kvm_pv_eoi,hv_vendor_id=NV43FIX,kvm=off'</div>
-    <div class="tip">With recent NVIDIA drivers (550+) and Proxmox 8.x this is often no longer needed. Try without it first — only add if you hit the error.</div>
-  </div></div>
-
-  <div class="step"><div class="sn ok">6</div><div class="sb">
-    <p class="sh">Set as primary GPU and finalize</p>
-    <p class="sd">Verify in DaVinci Resolve: Preferences → Memory and GPU → GPU Processing Mode shows CUDA with RTX 4070 Ti Super. Then in Proxmox → VM Hardware → edit the PCI device → enable Primary GPU. Set VM Display to None. From now on the VM boots directly to the physical GPU output.</p>
-  </div></div>
-</div>
-
-<!-- HOME ASSISTANT VM -->
-<div class="section" id="s-havm">
-  <p class="sec-title">Home Assistant OS — VM setup</p>
-  <p class="sec-sub">Home Assistant OS runs as a full VM giving access to Supervisor and the complete add-on ecosystem. This is the recommended install method for Proxmox.</p>
-
-  <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Download HAOS QEMU image</p>
-    <div class="cb"><span class="cm"># Check github.com/home-assistant/operating-system/releases for latest version</span>
-wget -O /var/lib/vz/images/haos.qcow2.xz \
-  https://github.com/home-assistant/operating-system/releases/download/XX.X/haos_ova-XX.X.qcow2.xz
-xz -d /var/lib/vz/images/haos.qcow2.xz</div>
-  </div></div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Create VM and import disk</p>
-    <div class="cb">qm create 101 --name homeassistant --memory 4096 --cores 2 \
-  --cpu host --machine q35 --bios ovmf \
-  --net0 virtio,bridge=vmbr0 --ostype l26
-
-qm set 101 --efidisk0 local-lvm:0,efitype=4m,pre-enrolled-keys=0
-qm importdisk 101 /var/lib/vz/images/haos.qcow2 local-lvm
-qm set 101 --scsi0 local-lvm:vm-101-disk-1,discard=on
-qm set 101 --boot order=scsi0
-qm set 101 --agent enabled=1
-qm start 101</div>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Complete onboarding</p>
-    <p class="sd">Wait 3–5 minutes for first boot. Open <span class="ic">http://homeassistant.local:8123</span> or check the IP in the Proxmox console for VM 101. Complete the onboarding wizard — account, location, home name.</p>
-  </div></div>
-
-  <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Set static IP</p>
-    <p class="sd">In HA: Settings → System → Network → set static IP <span class="ic">192.168.1.30</span>. This is the address all your automations and NPM reverse proxy will use.</p>
+    <p class="sh">Add PCI device to Windows VM in Proxmox</p>
+    <p class="sd">In the Proxmox web UI: <strong>VM 100 → Hardware → Add → PCI Device</strong>. Select the RTX 4070 Ti Super. Enable: All Functions ✓, ROM-Bar ✓, PCI-Express ✓. Do NOT enable Primary GPU yet.</p>
   </div></div>
 
   <div class="step"><div class="sn">5</div><div class="sb">
-    <p class="sh">Install essential add-ons</p>
-    <div class="cb">Settings → Add-ons → Add-on Store:
-
-Mosquitto broker    <span class="cm"># MQTT for smart devices</span>
-File editor         <span class="cm"># Edit config files from UI</span>
-Terminal &amp; SSH      <span class="cm"># Command line access</span>
-Node-RED            <span class="cm"># Visual automation editor</span>
-Samba backup        <span class="cm"># Back up HA config to NAS</span></div>
-  </div></div>
-
-  <div class="step"><div class="sn ok">6</div><div class="sb">
-    <p class="sh">Pass through Zigbee/Z-Wave USB stick</p>
-    <div class="cb"><span class="cm"># Find USB device vendor:product ID</span>
-lsusb
-<span class="cm"># e.g. Bus 001 Device 003: ID 10c4:8a2a</span>
-
-<span class="cm"># Pass through to HA VM by vendor:product ID (survives reboots)</span>
-qm set 101 --usb0 host=10c4:8a2a</div>
-  </div></div>
-</div>
-
-<!-- LXC CONTAINER -->
-<div class="section" id="s-lxc">
-  <p class="sec-title">Debian LXC container — setup</p>
-  <p class="sec-sub">This container is your Docker and Samba host. Lightweight, shares the Proxmox kernel, and mounts the ZFS datapool directly at full filesystem speed.</p>
-
-  <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Download Debian template</p>
-    <div class="cb">pveam update
-pveam download local debian-12-standard_12.7-1_amd64.tar.zst</div>
-  </div></div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Create the LXC container</p>
-    <div class="cb"><span class="ky">CT ID:</span>         200
-<span class="ky">Hostname:</span>     docker-host
-<span class="ky">Template:</span>     debian-12-standard
-<span class="ky">Disk:</span>         50 GB on local-lvm (NVMe)
-<span class="ky">CPU:</span>          4 cores
-<span class="ky">RAM:</span>          6144 MB
-<span class="ky">Network:</span>      vmbr0, static IP 192.168.1.20
-<span class="ky">Unprivileged:</span> YES (checked)</div>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Enable Docker kernel features before starting</p>
-    <div class="cb">nano /etc/pve/lxc/200.conf
-<span class="cm"># Add these lines at the bottom:</span>
-features: nesting=1,keyctl=1
-lxc.apparmor.profile: unconfined
-lxc.cap.drop:
-lxc.cgroup2.devices.allow: a
-lxc.mount.auto: proc:rw sys:rw</div>
-  </div></div>
-
-  <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Bind-mount ZFS datasets into container</p>
-    <div class="cb"><span class="cm"># Add to /etc/pve/lxc/200.conf</span>
-mp0: /datapool/media,mp=/mnt/media
-mp1: /datapool/projects,mp=/mnt/projects
-mp2: /datapool/documents,mp=/mnt/documents
-mp3: /datapool/backups,mp=/mnt/backups
-mp4: /datapool/docker,mp=/mnt/docker-data</div>
-    <div class="tip">Bind mounts give the container direct filesystem access to the ZFS pool — no NFS, no network, full speed. The same data is accessible from Samba shares inside this container.</div>
-  </div></div>
-
-  <div class="step"><div class="sn ok">5</div><div class="sb">
-    <p class="sh">Start and configure</p>
-    <div class="cb">pct start 200
-pct exec 200 -- bash
-<span class="cm"># Inside container:</span>
-apt update &amp;&amp; apt upgrade -y
-apt install -y curl wget nano net-tools ca-certificates gnupg lsb-release</div>
-  </div></div>
-</div>
-
-<!-- ZFS -->
-<div class="section" id="s-zfs">
-  <p class="sec-title">ZFS pool — full setup</p>
-  <p class="sec-sub">ZFS runs on the Proxmox host and manages your two IronWolf drives. Covers pool creation, datasets, scrubs, snapshots and failure alerts.</p>
-
-  <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Identify drives by stable by-id paths</p>
-    <div class="cb">lsblk -o NAME,SIZE,MODEL,SERIAL
-ls -la /dev/disk/by-id/ | grep -i seagate
-<span class="cm"># Use the full ata-ST8000VN004-xxxx_SERIALNO paths in the pool create</span></div>
-    <div class="warn-box">Always use by-id paths — not /dev/sda or /dev/sdb. Device names can change between reboots; by-id paths are permanently tied to the drive's serial number.</div>
-  </div></div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Create the ZFS mirror pool</p>
-    <div class="cb">zpool create -f \
-  -o ashift=12 \
-  -O compression=lz4 \
-  -O atime=off \
-  -O xattr=sa \
-  -O dnodesize=auto \
-  datapool mirror \
-  /dev/disk/by-id/ata-ST8000VN004-xxxx_SERIAL1 \
-  /dev/disk/by-id/ata-ST8000VN004-xxxx_SERIAL2
-
-zpool status datapool  <span class="cm"># should show: state: ONLINE</span></div>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Create datasets</p>
-    <div class="cb">zfs create datapool/media
-zfs create datapool/projects
-zfs create datapool/backups
-zfs create datapool/documents
-zfs create datapool/docker
-
-zfs set compression=off datapool/media   <span class="cm"># already compressed content</span>
-zfs set quota=2T datapool/backups        <span class="cm"># prevent backups filling the pool</span></div>
-  </div></div>
-
-  <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Add datapool to Proxmox storage</p>
-    <div class="cb">pvesm add zfspool datapool --pool datapool --sparse 1 --content images,rootdir</div>
-  </div></div>
-
-  <div class="step"><div class="sn">5</div><div class="sb">
-    <p class="sh">Configure monthly scrubs</p>
-    <div class="cb"><span class="cm"># Verify scrub timer is active</span>
-systemctl status zfs-scrub.timer
-
-<span class="cm"># Run a manual scrub now to confirm pool health</span>
-zpool scrub datapool &amp;&amp; zpool status datapool</div>
+    <p class="sh">Create Windows VM via CLI (reference)</p>
+    <p class="sd">If rebuilding from scratch, use these commands to create the Windows 11 VM with the correct settings for GPU passthrough.</p>
+    <div class="cb"><span class="cm"># Create Windows 11 VM with q35 machine and UEFI BIOS</span>
+qm create 100 \
+  --name win11 \
+  --machine q35 \
+  --bios ovmf \
+  --ostype win11 \
+  --cores 8 \
+  --sockets 1 \
+  --cpu host \
+  --memory 32768 \
+  --balloon 0 \
+  --net0 virtio,bridge=vmbr0 \
+  --scsihw virtio-scsi-pci \
+  --scsi0 vm-nvme:200 \
+  --ide2 local:iso/Win11.iso,media=cdrom \
+  --ide3 local:iso/virtio-win.iso,media=cdrom \
+  --efidisk0 vm-nvme:1,efitype=4m,pre-enrolled-keys=1 \
+  --tpmstate0 vm-nvme:4,version=v2.0 \
+  --boot order='ide2;scsi0'</div>
+    <div class="tip">Download the VirtIO drivers ISO from <span class="ic">fedorapeople.org/groups/virt/virtio-win/</span> — needed for Windows to see the NVMe disk during install.</div>
   </div></div>
 
   <div class="step"><div class="sn">6</div><div class="sb">
-    <p class="sh">Automatic snapshots with Sanoid</p>
-    <div class="cb">apt install sanoid -y</div>
-    <div class="fh">/etc/sanoid/sanoid.conf</div>
-    <div class="fb"><span class="cm">[datapool/projects]</span>
-<span class="ky">use_template</span> = <span class="vl">production</span>
-
-<span class="cm">[datapool/documents]</span>
-<span class="ky">use_template</span> = <span class="vl">production</span>
-
-<span class="cm">[template_production]</span>
-<span class="ky">hourly</span> = <span class="vl">6</span>
-<span class="ky">daily</span> = <span class="vl">14</span>
-<span class="ky">weekly</span> = <span class="vl">4</span>
-<span class="ky">monthly</span> = <span class="vl">3</span>
-<span class="ky">autosnap</span> = <span class="vl">yes</span>
-<span class="ky">autoprune</span> = <span class="vl">yes</span></div>
-    <div class="cb">systemctl enable sanoid.timer --now</div>
-    <div class="tip">Recover deleted files from: /datapool/projects/.zfs/snapshot/ — just copy the file back out. No commands needed.</div>
+    <p class="sh">Install NVIDIA Studio Driver in Windows VM</p>
+    <p class="sd">Boot Windows VM after GPU passthrough is configured. Install <strong>NVIDIA Studio Driver</strong> (not Game Ready Driver) — better stability for DaVinci Resolve and Premiere Pro.</p>
   </div></div>
 
-  <div class="step"><div class="sn ok">7</div><div class="sb">
-    <p class="sh">ZFS failure email alerts</p>
-    <div class="fh">/etc/zfs/zed.d/zed.rc — edit these values</div>
-    <div class="fb"><span class="ky">ZED_EMAIL_ADDR</span>=<span class="vl">"you@youremail.com"</span>
-<span class="ky">ZED_EMAIL_VERBOSE</span>=<span class="vl">1</span>
-<span class="ky">ZED_NOTIFY_INTERVAL_SECS</span>=<span class="vl">3600</span></div>
-    <div class="cb">systemctl enable zed --now</div>
+  <div class="step"><div class="sn ok">✓</div><div class="sb">
+    <p class="sh">Move monitor cable &amp; set primary GPU</p>
+    <p class="sd">Move monitor from motherboard HDMI → GPU DisplayPort. In Proxmox VM settings, set the GPU as Primary GPU. Proxmox console remains accessible via the web UI (192.168.1.10:8006) on the iGPU.</p>
   </div></div>
 </div>
 
-<!-- SAMBA -->
+<!-- ══ WINDOWS 11 VM ══ -->
+<div class="section" id="s-win11vm">
+  <p class="sec-title">Windows 11 VM setup</p>
+  <p class="sec-sub">Install Windows fully in Phase 1 before the GPU arrives. In Phase 2, adding the GPU is just attaching one PCI device and installing drivers — no Windows reinstall needed.</p>
+
+  <div class="step"><div class="sn">1</div><div class="sb">
+    <p class="sh">Create the VM (if not done via CLI)</p>
+    <p class="sd">In Proxmox web UI: <strong>Create VM</strong>. VM ID: 100. Machine: q35. BIOS: OVMF (UEFI). CPU: 8 cores, Type: host. RAM: 32768MB, no balloon. Disk: 200GB on vm-nvme storage.</p>
+  </div></div>
+
+  <div class="step"><div class="sn">2</div><div class="sb">
+    <p class="sh">Add a TPM 2.0 state disk</p>
+    <p class="sd">Windows 11 requires TPM 2.0. In VM Hardware, add: <strong>TPM State → Storage: vm-nvme, Version: v2.0</strong>.</p>
+  </div></div>
+
+  <div class="step"><div class="sn">3</div><div class="sb">
+    <p class="sh">Install Windows with VirtIO drivers</p>
+    <p class="sd">Attach both the Windows 11 ISO and the VirtIO drivers ISO as CDROMs. During install, when no disk is detected, click "Load driver" and browse the VirtIO ISO for the SCSI controller driver.</p>
+  </div></div>
+
+  <div class="step"><div class="sn">4</div><div class="sb">
+    <p class="sh">Install all VirtIO guest tools</p>
+    <p class="sd">After Windows installs, run the VirtIO ISO's <span class="ic">virtio-win-guest-tools.exe</span>. This installs all drivers (network, storage, balloon, display) for best VM performance.</p>
+  </div></div>
+
+  <div class="step"><div class="sn">5</div><div class="sb">
+    <p class="sh">Map Samba network drives</p>
+    <p class="sd">In Windows Explorer, map the NAS shares from the Docker LXC (192.168.1.20) as network drives.</p>
+    <div class="cb"><span class="cm">\\192.168.1.20\Projects  →  Z:\  (video editing projects)</span>
+<span class="cm">\\192.168.1.20\Media     →  Y:\  (films and TV)</span>
+<span class="cm">\\192.168.1.20\Documents →  X:\  (documents)</span>
+<span class="cm">\\192.168.1.20\Backups   →       (backup destination)</span></div>
+  </div></div>
+</div>
+
+<!-- ══ HOME ASSISTANT VM ══ -->
+<div class="section" id="s-havm">
+  <p class="sec-title">Home Assistant OS VM</p>
+  <p class="sec-sub">HAOS runs as a full virtual machine (not in Docker). This gives full Supervisor support, including the add-on store, snapshots, and hardware passthrough for Zigbee dongles.</p>
+
+  <div class="step"><div class="sn">1</div><div class="sb">
+    <p class="sh">Download HAOS qcow2 image</p>
+    <p class="sd">Download the latest HAOS image for KVM from home-assistant.io. Import it directly to Proxmox storage.</p>
+    <div class="cb"><span class="cm"># Download HAOS KVM image (check for latest version)</span>
+wget https://github.com/home-assistant/operating-system/releases/download/13.0/haos_ova-13.0.qcow2.xz
+xz -d haos_ova-13.0.qcow2.xz
+
+<span class="cm"># Create the VM shell</span>
+qm create 101 \
+  --name homeassistant \
+  --machine q35 \
+  --bios ovmf \
+  --ostype l26 \
+  --cores 2 \
+  --memory 6144 \
+  --net0 virtio,bridge=vmbr0
+
+<span class="cm"># Import the HAOS disk image</span>
+qm importdisk 101 haos_ova-13.0.qcow2 local-lvm
+
+<span class="cm"># Attach the imported disk</span>
+qm set 101 \
+  --scsi0 local-lvm:vm-101-disk-0 \
+  --scsihw virtio-scsi-pci \
+  --boot order=scsi0 \
+  --efidisk0 local-lvm:4,efitype=4m</span>
+
+<span class="cm"># Start the VM</span>
+qm start 101</div>
+    <div class="tip">Home Assistant will be accessible at <span class="ic">http://192.168.1.30:8123</span> within a few minutes of first boot. DHCP will assign an IP initially — set a static lease in your router, then configure it under HA Settings → System → Network.</div>
+  </div></div>
+
+  <div class="step"><div class="sn">2</div><div class="sb">
+    <p class="sh">Pass through Zigbee USB dongle (optional)</p>
+    <p class="sd">If using a USB Zigbee coordinator (e.g., Sonoff Zigbee 3.0 USB), pass it through to the HAOS VM.</p>
+    <div class="cb"><span class="cm"># Find the USB device ID</span>
+lsusb | grep -i sonoff
+<span class="cm"># Example: Bus 003 Device 004: ID 10c4:ea60 Silicon Labs</span>
+
+<span class="cm"># Add USB passthrough in Proxmox web UI:</span>
+<span class="cm"># VM 101 → Hardware → Add → USB Device → Use USB Vendor/Device ID</span>
+<span class="cm"># Enter vendor ID (10c4) and device ID (ea60)</span></div>
+  </div></div>
+</div>
+
+<!-- ══ DEBIAN LXC ══ -->
+<div class="section" id="s-lxc">
+  <p class="sec-title">Debian LXC (Docker host)</p>
+  <p class="sec-sub">An unprivileged LXC container running Debian 12 as the Docker host. Nesting must be enabled for Docker to work inside LXC.</p>
+
+  <div class="step"><div class="sn">1</div><div class="sb">
+    <p class="sh">Create Debian LXC container</p>
+    <p class="sd">Download the Debian 12 template first in Proxmox (local → CT Templates → debian-12-standard). Then create the container.</p>
+    <div class="cb"><span class="cm"># Download Debian 12 template</span>
+pveam update
+pveam download local debian-12-standard_12.7-1_amd64.tar.zst
+
+<span class="cm"># Create the LXC container</span>
+pct create 200 local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst \
+  --hostname nas \
+  --cores 4 \
+  --memory 8192 \
+  --swap 2048 \
+  --net0 name=eth0,bridge=vmbr0,ip=192.168.1.20/24,gw=192.168.1.1 \
+  --storage local-lvm \
+  --rootfs local-lvm:50 \
+  --unprivileged 1 \
+  --features nesting=1 \
+  --password <span class="cm">(enter root password)</span>
+
+<span class="cm"># Start it</span>
+pct start 200
+pct enter 200</div>
+  </div></div>
+
+  <div class="step"><div class="sn">2</div><div class="sb">
+    <p class="sh">Mount the ZFS datapool inside the LXC</p>
+    <p class="sd">Bind-mount the ZFS pool directories into the container so Docker services can access NAS data.</p>
+    <div class="cb"><span class="cm"># On the Proxmox HOST (not in the container)</span>
+<span class="cm"># Create mount point directories on the ZFS pool</span>
+mkdir -p /datapool/{media,projects,documents,backups}
+
+<span class="cm"># Add bind-mounts to the LXC config</span>
+pct set 200 --mp0 /datapool,mp=/datapool,shared=1
+
+<span class="cm"># Or edit config directly</span>
+nano /etc/pve/lxc/200.conf
+<span class="cm"># Add lines:</span>
+mp0: /datapool,mp=/datapool</div>
+  </div></div>
+
+  <div class="step"><div class="sn">3</div><div class="sb">
+    <p class="sh">Install Docker inside the LXC</p>
+    <p class="sd">Run these commands inside the container (<span class="ic">pct enter 200</span>).</p>
+    <div class="cb"><span class="cm"># Inside the LXC — update and install prerequisites</span>
+apt update && apt upgrade -y
+apt install -y ca-certificates curl gnupg lsb-release
+
+<span class="cm"># Add Docker's official GPG key and repo</span>
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg \
+  | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
+  > /etc/apt/sources.list.d/docker.list
+
+<span class="cm"># Install Docker Engine</span>
+apt update
+apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+<span class="cm"># Enable and start Docker</span>
+systemctl enable docker
+systemctl start docker
+
+<span class="cm"># Verify</span>
+docker run hello-world</div>
+  </div></div>
+</div>
+
+<!-- ══ ZFS POOL ══ -->
+<div class="section" id="s-zfs">
+  <p class="sec-title">ZFS pool — IronWolf Mirror</p>
+  <p class="sec-sub">The two 8TB Seagate IronWolf drives run as a ZFS Mirror (RAID-1). 8TB usable with full redundancy — one drive can fail with zero data loss. Expandable to RAID-Z1 and RAID-Z2 by adding drives later.</p>
+
+  <div class="step"><div class="sn">1</div><div class="sb">
+    <p class="sh">Create ZFS Mirror pool (CLI method)</p>
+    <p class="sd">Always use <span class="ic">/dev/disk/by-id/</span> paths for ZFS — stable identifiers that won't shift on reboot.</p>
+    <div class="cb"><span class="cm"># List drives by ID</span>
+ls /dev/disk/by-id/ | grep -i seagate | grep -v part
+
+<span class="cm"># Create mirror pool — replace wwn-... with your actual IDs</span>
+zpool create -f -o ashift=12 datapool mirror \
+  /dev/disk/by-id/wwn-0x5000c500xxxxxxxx \
+  /dev/disk/by-id/wwn-0x5000c500yyyyyyyy
+
+<span class="cm"># Verify</span>
+zpool status datapool
+zpool list datapool</div>
+    <div class="tip"><span class="ic">ashift=12</span> sets 4K sector alignment for the IronWolf drives — always specify this at pool creation; it cannot be changed after.</div>
+  </div></div>
+
+  <div class="step"><div class="sn">2</div><div class="sb">
+    <p class="sh">Set ZFS datasets for shares</p>
+    <div class="cb"><span class="cm"># Create datasets for each share category</span>
+zfs create datapool/media
+zfs create datapool/projects
+zfs create datapool/documents
+zfs create datapool/backups
+zfs create datapool/docker   <span class="cm"># Docker volumes</span>
+
+<span class="cm"># Enable compression (LZ4 — fast, ~1.5x ratio for media)</span>
+zfs set compression=lz4 datapool
+
+<span class="cm"># List all datasets</span>
+zfs list</div>
+  </div></div>
+
+  <div class="step"><div class="sn">3</div><div class="sb">
+    <p class="sh">Configure ZFS ARC cache size</p>
+    <p class="sd">With 64GB RAM, ZFS ARC can grow large. Limit it so the VMs always have their allocated memory.</p>
+    <div class="cb"><span class="cm"># Set ARC max to 14GB (allows ZFS to use up to 14GB of free RAM for read cache)</span>
+echo "options zfs zfs_arc_max=15032385536" > /etc/modprobe.d/zfs.conf
+update-initramfs -u</div>
+  </div></div>
+
+  <div class="step"><div class="sn">4</div><div class="sb">
+    <p class="sh">Enable weekly scrubs</p>
+    <div class="cb"><span class="cm"># Proxmox includes a weekly scrub cron by default</span>
+<span class="cm"># Verify it's enabled:</span>
+cat /etc/cron.d/zfsutils-linux
+
+<span class="cm"># Run a scrub manually anytime to verify disk health:</span>
+zpool scrub datapool
+zpool status datapool   <span class="cm"># Check after scrub completes</span></div>
+  </div></div>
+
+  <div class="divider">Storage Expansion Path</div>
+  <table class="tbl">
+    <tr><th>Stage</th><th>Drives</th><th>ZFS Config</th><th>Usable Space</th></tr>
+    <tr><td>Launch</td><td>2× 8TB</td><td>Mirror (RAID-1)</td><td>8TB</td></tr>
+    <tr><td>Expand</td><td>3× 8TB</td><td>RAID-Z1</td><td>16TB</td></tr>
+    <tr><td>Protect</td><td>4× 8TB</td><td>RAID-Z2 (2-drive failure)</td><td>16TB</td></tr>
+    <tr><td>Grow</td><td>6× 8TB</td><td>RAID-Z2</td><td>32TB</td></tr>
+    <tr><td>Future</td><td>6× 16TB</td><td>RAID-Z2</td><td>64TB</td></tr>
+  </table>
+  <div class="tip">Fractal Define 7 supports 14× 3.5" drives in storage layout. The B650 has 4× SATA ports — drives 5+ will require a PCIe SATA expansion card.</div>
+</div>
+
+<!-- ══ SAMBA & NFS ══ -->
 <div class="section" id="s-samba">
-  <p class="sec-title">Samba &amp; NFS file shares</p>
-  <p class="sec-sub">Samba exposes ZFS datasets as Windows network drives. Your Windows VM maps them as drive letters. Video editing projects stored on the NAS pool are accessed natively. Run all commands inside the LXC container.</p>
+  <p class="sec-title">Samba &amp; NFS shares</p>
+  <p class="sec-sub">Run inside the Debian LXC (CT 200 at 192.168.1.20). Samba serves Windows network drives; NFS serves Linux VMs and containers.</p>
 
   <div class="step"><div class="sn">1</div><div class="sb">
     <p class="sh">Install Samba</p>
-    <div class="cb">apt install -y samba samba-common-bin
-cp /etc/samba/smb.conf /etc/samba/smb.conf.bak</div>
+    <div class="cb"><span class="cm"># Inside LXC (pct enter 200)</span>
+apt install -y samba samba-common-bin
+
+<span class="cm"># Create Samba user (must match a Linux user)</span>
+useradd -M -s /usr/sbin/nologin sambauser
+smbpasswd -a sambauser   <span class="cm"># set a password</span></div>
   </div></div>
 
   <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Create Linux user for share access</p>
-    <div class="cb">useradd -M -s /sbin/nologin yourname
-smbpasswd -a yourname
-smbpasswd -e yourname
-chown -R yourname:yourname /mnt/projects /mnt/documents
-chmod -R 0770 /mnt/projects /mnt/documents
-chmod -R 0775 /mnt/media /mnt/backups</div>
-  </div></div>
+    <p class="sh">Configure /etc/samba/smb.conf</p>
+    <p class="fh">/etc/samba/smb.conf</p>
+    <p class="fb">[global]
+   workgroup = WORKGROUP
+   server string = NAS
+   security = user
+   map to guest = never
+   smb encrypt = desired
 
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Write smb.conf</p>
-    <div class="fh">/etc/samba/smb.conf</div>
-    <div class="fb"><span class="cm">[global]</span>
-<span class="ky">   workgroup</span> = <span class="vl">WORKGROUP</span>
-<span class="ky">   server string</span> = <span class="vl">Home NAS</span>
-<span class="ky">   netbios name</span> = <span class="vl">nas</span>
-<span class="ky">   server min protocol</span> = <span class="vl">SMB3</span>
-<span class="ky">   socket options</span> = <span class="vl">TCP_NODELAY IPTOS_LOWDELAY</span>
-<span class="ky">   use sendfile</span> = <span class="vl">yes</span>
+[Projects]
+   path = /datapool/projects
+   browseable = yes
+   read only = no
+   valid users = sambauser
+   create mask = 0664
+   directory mask = 0775
 
-<span class="cm">[Projects]</span>
-<span class="ky">   path</span> = <span class="vl">/mnt/projects</span>
-<span class="ky">   read only</span> = <span class="vl">no</span>
-<span class="ky">   valid users</span> = <span class="vl">yourname</span>
+[Media]
+   path = /datapool/media
+   browseable = yes
+   read only = no
+   valid users = sambauser
 
-<span class="cm">[Media]</span>
-<span class="ky">   path</span> = <span class="vl">/mnt/media</span>
-<span class="ky">   read only</span> = <span class="vl">yes</span>
-<span class="ky">   valid users</span> = <span class="vl">yourname</span>
+[Documents]
+   path = /datapool/documents
+   browseable = yes
+   read only = no
+   valid users = sambauser
 
-<span class="cm">[Documents]</span>
-<span class="ky">   path</span> = <span class="vl">/mnt/documents</span>
-<span class="ky">   read only</span> = <span class="vl">no</span>
-<span class="ky">   valid users</span> = <span class="vl">yourname</span>
-
-<span class="cm">[Backups]</span>
-<span class="ky">   path</span> = <span class="vl">/mnt/backups</span>
-<span class="ky">   read only</span> = <span class="vl">no</span>
-<span class="ky">   valid users</span> = <span class="vl">yourname</span></div>
-  </div></div>
-
-  <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Test and start Samba</p>
-    <div class="cb">testparm
+[Backups]
+   path = /datapool/backups
+   browseable = yes
+   read only = no
+   valid users = sambauser</p>
+    <div class="cb"><span class="cm"># Restart Samba and enable on boot</span>
 systemctl restart smbd nmbd
-systemctl enable smbd nmbd</div>
+systemctl enable smbd nmbd
+
+<span class="cm"># Test config</span>
+testparm</div>
   </div></div>
 
-  <div class="step"><div class="sn">5</div><div class="sb">
-    <p class="sh">Map shares in Windows VM</p>
-    <div class="cb">\\192.168.1.20\Projects   → Map as Z: (video editing projects)
-\\192.168.1.20\Media      → Map as Y: (films and TV)
-\\192.168.1.20\Documents  → Map as X:</div>
-    <p class="sd" style="margin-top:6px">In DaVinci Resolve: point your media storage and project library at the Z: drive.</p>
-  </div></div>
+  <div class="step"><div class="sn">3</div><div class="sb">
+    <p class="sh">Install and configure NFS</p>
+    <div class="cb"><span class="cm"># Install NFS server</span>
+apt install -y nfs-kernel-server
 
-  <div class="step"><div class="sn ok">6</div><div class="sb">
-    <p class="sh">NFS shares for Linux VMs</p>
-    <div class="cb">apt install -y nfs-kernel-server</div>
-    <div class="fh">/etc/exports</div>
-    <div class="fb">/mnt/media      192.168.1.0/24(ro,sync,no_subtree_check)
-/mnt/projects   192.168.1.0/24(rw,sync,no_subtree_check,no_root_squash)
-/mnt/documents  192.168.1.0/24(rw,sync,no_subtree_check)</div>
-    <div class="cb">exportfs -ra &amp;&amp; systemctl enable nfs-kernel-server --now</div>
+<span class="cm"># Configure exports</span>
+cat >> /etc/exports << 'EOF'
+/datapool/media      192.168.1.0/24(rw,sync,no_subtree_check)
+/datapool/projects   192.168.1.0/24(rw,sync,no_subtree_check)
+/datapool/documents  192.168.1.0/24(rw,sync,no_subtree_check)
+/datapool/backups    192.168.1.0/24(rw,sync,no_subtree_check)
+EOF
+
+<span class="cm"># Apply exports and restart</span>
+exportfs -ra
+systemctl restart nfs-kernel-server
+systemctl enable nfs-kernel-server
+
+<span class="cm"># Verify</span>
+showmount -e localhost</div>
   </div></div>
 </div>
 
-<!-- DOCKER -->
+<!-- ══ DOCKER STACK ══ -->
 <div class="section" id="s-docker">
-  <p class="sec-title">Docker stack — full setup</p>
-  <p class="sec-sub">All services run via Docker Compose inside the LXC container. Each service is isolated, easy to update, and defined in files you can back up. Run all commands inside the container.</p>
+  <p class="sec-title">Docker stack</p>
+  <p class="sec-sub">All services run inside CT 200 (Debian LXC at 192.168.1.20). Managed via a single docker-compose file for easy maintenance.</p>
 
   <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Install Docker Engine</p>
-    <div class="cb">install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/debian/gpg \
-  -o /etc/apt/keyrings/docker.asc
-chmod a+r /etc/apt/keyrings/docker.asc
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] \
-  https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
-  > /etc/apt/sources.list.d/docker.list
-apt update
-apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-docker run hello-world  <span class="cm"># verify install</span></div>
+    <p class="sh">Create directory structure</p>
+    <div class="cb">mkdir -p /opt/docker/{jellyfin,npm,duplicati,portainer}/{config,data}
+mkdir -p /opt/docker/jellyfin/cache</div>
   </div></div>
 
   <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Install Portainer (web UI)</p>
-    <div class="cb">docker volume create portainer_data
-docker run -d --name portainer --restart always \
-  -p 9000:9000 \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v portainer_data:/data \
-  portainer/portainer-ce:latest</div>
-    <p class="sd" style="margin-top:6px">Access at <span class="ic">http://192.168.1.20:9000</span>. Create admin account on first login.</p>
+    <p class="sh">docker-compose.yml — full stack</p>
+    <p class="fh">/opt/docker/docker-compose.yml</p>
+    <p class="fb">version: "3.9"
+
+services:
+
+  # ── Portainer — Docker management UI ──────────────────
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/docker/portainer/data:/data
+
+  # ── Jellyfin — media server ────────────────────────────
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    network_mode: host   # Port 8096
+    environment:
+      - JELLYFIN_PublishedServerUrl=http://192.168.1.20:8096
+    volumes:
+      - /opt/docker/jellyfin/config:/config
+      - /opt/docker/jellyfin/cache:/cache
+      - /datapool/media:/media:ro
+
+  # ── Nginx Proxy Manager — reverse proxy + SSL ─────────
+  npm:
+    image: jlesage/nginx-proxy-manager:latest
+    container_name: npm
+    restart: unless-stopped
+    ports:
+      - "80:8080"
+      - "443:4443"
+      - "81:8181"   # Admin UI
+    volumes:
+      - /opt/docker/npm/config:/config
+
+  # ── Duplicati — backup agent ───────────────────────────
+  duplicati:
+    image: linuxserver/duplicati:latest
+    container_name: duplicati
+    restart: unless-stopped
+    ports:
+      - "8200:8200"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+    volumes:
+      - /opt/docker/duplicati/config:/config
+      - /datapool/backups:/backups
+      - /datapool:/source:ro</p>
+
+    <div class="cb"><span class="cm"># Start the full stack</span>
+cd /opt/docker
+docker compose up -d
+
+<span class="cm"># Check all containers are running</span>
+docker compose ps
+
+<span class="cm"># View logs for a specific service</span>
+docker compose logs -f jellyfin</div>
   </div></div>
 
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Create shared environment file</p>
-    <div class="cb">mkdir -p /opt/docker/{nginx-proxy,jellyfin,duplicati}
-mkdir -p /mnt/docker-data/{nginx-proxy,jellyfin,duplicati}
-nano /opt/docker/.env</div>
-    <div class="fh">/opt/docker/.env</div>
-    <div class="fb"><span class="ky">PUID</span>=<span class="vl">1000</span>
-<span class="ky">PGID</span>=<span class="vl">1000</span>
-<span class="ky">TZ</span>=<span class="vl">America/New_York</span>
-<span class="ky">DATA_ROOT</span>=<span class="vl">/mnt</span>
-<span class="ky">CONFIG_ROOT</span>=<span class="vl">/mnt/docker-data</span></div>
-  </div></div>
-
-  <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Nginx Proxy Manager</p>
-    <div class="fh">/opt/docker/nginx-proxy/compose.yml</div>
-    <div class="fb"><span class="ky">services</span>:
-  <span class="ky">nginx-proxy-manager</span>:
-    <span class="ky">image</span>: <span class="vl">jc21/nginx-proxy-manager:latest</span>
-    <span class="ky">container_name</span>: <span class="vl">nginx-proxy</span>
-    <span class="ky">restart</span>: <span class="vl">unless-stopped</span>
-    <span class="ky">ports</span>:
-      - <span class="vl">"80:80"</span>
-      - <span class="vl">"443:443"</span>
-      - <span class="vl">"81:81"</span>
-    <span class="ky">volumes</span>:
-      - <span class="vl">/mnt/docker-data/nginx-proxy/data:/data</span>
-      - <span class="vl">/mnt/docker-data/nginx-proxy/letsencrypt:/etc/letsencrypt</span></div>
-    <div class="cb">cd /opt/docker/nginx-proxy &amp;&amp; docker compose up -d</div>
-    <p class="sd">Admin at <span class="ic">http://192.168.1.20:81</span> — default login <span class="ic">admin@example.com / changeme</span> — change immediately.</p>
-  </div></div>
-
-  <div class="step"><div class="sn">5</div><div class="sb">
-    <p class="sh">Jellyfin media server</p>
-    <div class="fh">/opt/docker/jellyfin/compose.yml</div>
-    <div class="fb"><span class="ky">services</span>:
-  <span class="ky">jellyfin</span>:
-    <span class="ky">image</span>: <span class="vl">jellyfin/jellyfin:latest</span>
-    <span class="ky">container_name</span>: <span class="vl">jellyfin</span>
-    <span class="ky">restart</span>: <span class="vl">unless-stopped</span>
-    <span class="ky">ports</span>:
-      - <span class="vl">"8096:8096"</span>
-    <span class="ky">environment</span>:
-      - <span class="vl">PUID=${PUID}</span>
-      - <span class="vl">PGID=${PGID}</span>
-      - <span class="vl">TZ=${TZ}</span>
-    <span class="ky">volumes</span>:
-      - <span class="vl">/mnt/docker-data/jellyfin/config:/config</span>
-      - <span class="vl">/mnt/media:/media:ro</span></div>
-    <div class="cb">cd /opt/docker/jellyfin &amp;&amp; docker compose up -d</div>
-  </div></div>
-
-  <div class="step"><div class="sn">6</div><div class="sb">
-    <p class="sh">Duplicati backups</p>
-    <div class="fh">/opt/docker/duplicati/compose.yml</div>
-    <div class="fb"><span class="ky">services</span>:
-  <span class="ky">duplicati</span>:
-    <span class="ky">image</span>: <span class="vl">lscr.io/linuxserver/duplicati:latest</span>
-    <span class="ky">container_name</span>: <span class="vl">duplicati</span>
-    <span class="ky">restart</span>: <span class="vl">unless-stopped</span>
-    <span class="ky">ports</span>:
-      - <span class="vl">"8200:8200"</span>
-    <span class="ky">environment</span>:
-      - <span class="vl">PUID=${PUID}</span>
-      - <span class="vl">PGID=${PGID}</span>
-      - <span class="vl">TZ=${TZ}</span>
-    <span class="ky">volumes</span>:
-      - <span class="vl">/mnt/docker-data/duplicati/config:/config</span>
-      - <span class="vl">/mnt/backups:/backups</span>
-      - <span class="vl">/mnt/documents:/source/documents:ro</span>
-      - <span class="vl">/mnt/projects:/source/projects:ro</span></div>
-    <div class="cb">cd /opt/docker/duplicati &amp;&amp; docker compose up -d</div>
-  </div></div>
-
-  <div class="step"><div class="sn ok">7</div><div class="sb">
-    <p class="sh">Watchtower — automatic container updates</p>
-    <div class="cb">docker run -d --name watchtower --restart always \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  containrrr/watchtower --schedule "0 0 3 * * *" --cleanup</div>
-    <div class="tip">Runs at 3:00 AM daily. --cleanup removes old images after updating to save disk space.</div>
+  <div class="step"><div class="sn ok">✓</div><div class="sb">
+    <p class="sh">Service access URLs</p>
+    <div class="svc-card"><p class="svc-title">Portainer</p><p class="svc-desc">Docker container management UI</p><p class="svc-url">http://192.168.1.20:9000</p></div>
+    <div class="svc-card"><p class="svc-title">Jellyfin</p><p class="svc-desc">Media streaming server</p><p class="svc-url">http://192.168.1.20:8096</p></div>
+    <div class="svc-card"><p class="svc-title">Nginx Proxy Manager</p><p class="svc-desc">Reverse proxy and SSL certificate management</p><p class="svc-url">http://192.168.1.20:81</p></div>
+    <div class="svc-card"><p class="svc-title">Duplicati</p><p class="svc-desc">Backup agent — configure backup jobs here</p><p class="svc-url">http://192.168.1.20:8200</p></div>
   </div></div>
 </div>
 
-<!-- NETWORKING -->
+<!-- ══ NETWORKING ══ -->
 <div class="section" id="s-networking">
-  <p class="sec-title">Network configuration</p>
-  <p class="sec-sub">Proxmox bridges, static IPs, an optional IoT isolation network, and Tailscale for secure remote access.</p>
+  <p class="sec-title">IP assignments &amp; services</p>
+  <p class="sec-sub">Static IP assignments for all hosts. Set these as DHCP reservations in your router, or configure statically in each VM/LXC.</p>
 
-  <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Proxmox bridge config</p>
-    <div class="fh">/etc/network/interfaces (Proxmox host)</div>
-    <div class="fb"><span class="ky">auto</span> lo
-<span class="ky">iface</span> lo <span class="vl">inet loopback</span>
-
-<span class="cm"># Intel i225-V 2.5GbE — physical NIC (name may differ, check with: ip link show)</span>
-<span class="ky">auto</span> enp6s0
-<span class="ky">iface</span> enp6s0 <span class="vl">inet manual</span>
-
-<span class="cm"># Main bridge — all VMs attach here</span>
-<span class="ky">auto</span> vmbr0
-<span class="ky">iface</span> vmbr0 <span class="vl">inet static</span>
-  address 192.168.1.10/24
-  gateway 192.168.1.1
-  bridge-ports enp6s0
-  bridge-stp off
-  bridge-fd 0
-  dns-nameservers 1.1.1.1 8.8.8.8</div>
-  </div></div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Reserve static IPs on your router</p>
-    <div class="cb"><span class="ky">192.168.1.10</span>  Proxmox host       (pve.local)
-<span class="ky">192.168.1.11</span>  Windows VM         (desktop.local)
-<span class="ky">192.168.1.20</span>  Docker LXC         (nas.local)
-<span class="ky">192.168.1.30</span>  Home Assistant VM  (homeassistant.local)</div>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">IoT isolation bridge (optional)</p>
-    <p class="sd">Add a virtual internal bridge with no physical NIC — keeps smart home devices isolated from your main LAN:</p>
-    <div class="fb"><span class="cm"># Add to /etc/network/interfaces</span>
-<span class="ky">auto</span> vmbr1
-<span class="ky">iface</span> vmbr1 <span class="vl">inet static</span>
-  address 10.0.1.1/24
-  bridge-ports none
-  bridge-stp off
-  bridge-fd 0</div>
-    <div class="cb">ifreload -a</div>
-    <p class="sd">Add a second NIC to the HA VM on vmbr1. HA manages IoT devices on 10.0.1.x while staying accessible to you on 192.168.1.x.</p>
-  </div></div>
-
-  <div class="step"><div class="sn ok">4</div><div class="sb">
-    <p class="sh">Tailscale — secure remote access</p>
-    <p class="sd">Access your entire server from anywhere — no port forwarding, no exposed ports, works through NAT:</p>
-    <div class="cb"><span class="cm"># On Proxmox host</span>
-curl -fsSL https://tailscale.com/install.sh | sh
-tailscale up --advertise-routes=192.168.1.0/24
-
-<span class="cm"># Install on Windows VM from tailscale.com/download</span>
-<span class="cm"># Also install on your phone for mobile access</span></div>
-    <div class="tip">Subnet routing exposes your entire 192.168.1.x network through the VPN. From your phone you can reach Proxmox, Home Assistant, Portainer and Samba shares from anywhere.</div>
-  </div></div>
-</div>
-
-<!-- SSL -->
-<div class="section" id="s-ssl">
-  <p class="sec-title">Nginx Proxy Manager — SSL setup</p>
-  <p class="sec-sub">NPM gives every service a clean HTTPS URL instead of an IP and port. Option A uses a local domain (LAN only). Option B uses a real public domain with free Let's Encrypt certificates.</p>
-
-  <div class="divider">Option A — local domain with mkcert (no public domain needed)</div>
-
-  <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Generate wildcard cert with mkcert</p>
-    <div class="cb">apt install -y libnss3-tools
-curl -JLO https://dl.filippo.io/mkcert/latest?for=linux/amd64
-chmod +x mkcert-v*-linux-amd64 &amp;&amp; mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
-mkcert -install
-mkdir -p /opt/certs &amp;&amp; cd /opt/certs
-mkcert "*.home.local" home.local</div>
-    <div class="tip">Install the root CA from ~/.local/share/mkcert/rootCA.pem on every device that needs to trust these certs (Windows, iOS, Android).</div>
-  </div></div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Upload cert to NPM and add DNS entries</p>
-    <p class="sd">NPM admin (<span class="ic">http://192.168.1.20:81</span>) → SSL Certificates → Custom → upload .pem and -key.pem. Then add these DNS entries on your router pointing to <span class="ic">192.168.1.20</span>:</p>
-    <div class="cb">proxmox.home.local    portainer.home.local
-nas.home.local        jellyfin.home.local
-duplicati.home.local  home.home.local</div>
-  </div></div>
-
-  <div class="divider">Option B — Let's Encrypt with a real domain (public HTTPS)</div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Port forward and configure Cloudflare DNS</p>
-    <div class="cb"><span class="cm"># Router port forwards → 192.168.1.20</span>
-Port 80  → 192.168.1.20:80
-Port 443 → 192.168.1.20:443
-
-<span class="cm"># Cloudflare DNS A records → YOUR.PUBLIC.IP</span>
-home.yourdomain.com
-jellyfin.yourdomain.com</div>
-    <div class="warn-box">Never expose Proxmox, Portainer or Samba to the internet directly. Only expose services that require public access.</div>
-  </div></div>
-
-  <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Request Let's Encrypt cert in NPM</p>
-    <p class="sd">NPM → SSL Certificates → Add → Let's Encrypt. Enter domain names and email. For a wildcard cert (*.yourdomain.com) use the DNS Challenge with a Cloudflare API token — one cert covers every subdomain automatically.</p>
-  </div></div>
-
-  <div class="step"><div class="sn ok">5</div><div class="sb">
-    <p class="sh">Create proxy host — Home Assistant (example)</p>
-    <div class="cb"><span class="ky">Domain:</span>             home.yourdomain.com
-<span class="ky">Forward to:</span>         192.168.1.30:8123
-<span class="ky">Websockets Support:</span> On  ← REQUIRED for HA
-<span class="ky">Force SSL:</span>          On
-<span class="ky">HTTP/2:</span>             On
-<span class="ky">HSTS:</span>               On</div>
-    <div class="fh">Add to Home Assistant configuration.yaml</div>
-    <div class="fb"><span class="ky">http</span>:
-  <span class="ky">use_x_forwarded_for</span>: <span class="vl">true</span>
-  <span class="ky">trusted_proxies</span>:
-    - <span class="vl">192.168.1.20</span></div>
-  </div></div>
-</div>
-
-<!-- NPM ADVANCED -->
-<div class="section" id="s-npmadv">
-  <p class="sec-title">Nginx Proxy Manager — advanced config</p>
-  <p class="sec-sub">Security headers, access controls, rate limiting and per-service proxy configuration.</p>
-
-  <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Proxmox proxy host (internal only)</p>
-    <div class="cb"><span class="ky">Domain:</span>       proxmox.home.local
-<span class="ky">Scheme:</span>       https
-<span class="ky">Forward to:</span>   192.168.1.10:8006
-<span class="ky">Websockets:</span>   On
-
-<span class="cm"># Advanced tab — accept Proxmox self-signed cert:</span>
-proxy_ssl_verify off;</div>
-  </div></div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Jellyfin proxy host</p>
-    <div class="cb"><span class="ky">Domain:</span>       jellyfin.yourdomain.com
-<span class="ky">Forward to:</span>   192.168.1.20:8096
-<span class="ky">Websockets:</span>   On
-
-<span class="cm"># Advanced tab:</span>
-add_header X-Frame-Options "SAMEORIGIN";
-add_header X-Content-Type-Options "nosniff";
-proxy_buffering off;</div>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Access Lists — password-protect sensitive services</p>
-    <div class="cb"><span class="cm"># NPM → Access Lists → Add Access List</span>
-Name: Admin Services
-Users: yourusername / strong_password
-
-<span class="cm"># Assign to: portainer.home.local, duplicati.home.local</span></div>
-    <div class="tip">Access lists add HTTP Basic Auth to any service — even those without their own login. Fast way to add a password layer to anything.</div>
-  </div></div>
-
-  <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Global security headers</p>
-    <div class="fh">NPM → Settings → Default Site — custom Nginx config</div>
-    <div class="fb">add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-add_header X-Content-Type-Options "nosniff" always;
-add_header X-Frame-Options "SAMEORIGIN" always;
-add_header X-XSS-Protection "1; mode=block" always;
-add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-server_tokens off;</div>
-  </div></div>
-
-  <div class="step"><div class="sn ok">5</div><div class="sb">
-    <p class="sh">Rate limiting — protect public-facing login pages</p>
-    <div class="fh">Advanced tab on any externally exposed proxy host</div>
-    <div class="fb">limit_req_zone $binary_remote_addr zone=login:10m rate=10r/s;
-limit_req zone=login burst=20 nodelay;
-limit_req_status 429;</div>
-  </div></div>
-</div>
-
-<!-- HA BASICS -->
-<div class="section" id="s-habasics">
-  <p class="sec-title">Home Assistant — basics &amp; configuration</p>
-  <p class="sec-sub">Get the foundation right before building automations. This covers the config structure, key integrations, Zigbee2MQTT, helpers and dashboard setup.</p>
-
-  <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">configuration.yaml structure</p>
-    <div class="fh">/config/configuration.yaml</div>
-    <div class="fb"><span class="ky">homeassistant</span>:
-  <span class="ky">name</span>: <span class="vl">Home</span>
-  <span class="ky">latitude</span>: <span class="vl">42.36</span>
-  <span class="ky">longitude</span>: <span class="vl">-73.08</span>
-  <span class="ky">unit_system</span>: <span class="vl">imperial</span>
-  <span class="ky">currency</span>: <span class="vl">USD</span>
-  <span class="ky">country</span>: <span class="vl">US</span>
-
-<span class="ky">automation</span>: <span class="vl">!include automations.yaml</span>
-<span class="ky">script</span>: <span class="vl">!include scripts.yaml</span>
-<span class="ky">scene</span>: <span class="vl">!include scenes.yaml</span>
-<span class="ky">input_boolean</span>: <span class="vl">!include input_booleans.yaml</span>
-<span class="ky">input_number</span>: <span class="vl">!include input_numbers.yaml</span>
-
-<span class="ky">logger</span>:
-  <span class="ky">default</span>: <span class="vl">warning</span>
-
-<span class="ky">http</span>:
-  <span class="ky">use_x_forwarded_for</span>: <span class="vl">true</span>
-  <span class="ky">trusted_proxies</span>:
-    - <span class="vl">192.168.1.20</span></div>
-  </div></div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Essential integrations</p>
-    <div class="cb">Settings → Devices &amp; Services → Add Integration:
-
-Mobile App         — GPS presence + push notifications
-Met.no             — weather (free, no API key)
-Sun                — sunrise/sunset sensor
-HACS               — community integrations store
-Ping (ICMP)        — detect if devices are online
-System Monitor     — server CPU, RAM, disk
-MQTT               — for Zigbee2MQTT and IoT devices
-Google Cast        — Chromecast / Google Home speakers</div>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Zigbee2MQTT configuration</p>
-    <div class="fh">Zigbee2MQTT add-on config</div>
-    <div class="fb"><span class="ky">mqtt</span>:
-  <span class="ky">server</span>: <span class="vl">mqtt://localhost</span>
-  <span class="ky">user</span>: <span class="vl">mqtt_user</span>
-  <span class="ky">password</span>: <span class="vl">mqtt_password</span>
-<span class="ky">serial</span>:
-  <span class="ky">port</span>: <span class="vl">/dev/ttyUSB0</span>
-<span class="ky">homeassistant</span>: <span class="vl">true</span>
-<span class="ky">frontend</span>:
-  <span class="ky">port</span>: <span class="vl">8099</span></div>
-  </div></div>
-
-  <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Create these helpers first</p>
-    <div class="cb"><span class="cm"># Settings → Helpers → Create Helper</span>
-
-<span class="cm"># Input Select (most powerful pattern in HA)</span>
-input_select.house_mode   options: Home, Away, Sleep, Guest
-
-<span class="cm"># Input Booleans</span>
-input_boolean.guest_mode
-input_boolean.vacation_mode
-
-<span class="cm"># Input Numbers</span>
-input_number.sleep_timeout    min:5 max:60 default:20</div>
-    <div class="tip">The house_mode input_select is the single most powerful pattern in HA. Every automation checks this one helper instead of presence directly — one place to change state that controls everything.</div>
-  </div></div>
-
-  <div class="step"><div class="sn ok">5</div><div class="sb">
-    <p class="sh">Recommended HACS dashboard cards</p>
-    <div class="cb">mushroom cards     — clean modern status cards
-mini-graph-card    — sparkline sensor graphs
-button-card        — highly customisable action buttons
-weather-card       — animated weather display
-auto-entities      — dynamic entity lists
-layout-card        — custom grid layouts</div>
-  </div></div>
-</div>
-
-<!-- HA AUTOMATIONS -->
-<div class="section" id="s-haauto">
-  <p class="sec-title">Home Assistant — automations</p>
-  <p class="sec-sub">Production-ready automations. Paste into automations.yaml or import via the UI. Edit entity IDs to match your devices.</p>
-
-  <div class="acard">
-    <p class="atitle">Presence detection — house mode on arrival/departure <span class="badge bk">Essential</span></p>
-    <p class="adesc">Uses HA companion app GPS. 2-minute delay on departure prevents false triggers.</p>
-    <div class="fb">- <span class="ky">id</span>: <span class="vl">'arrive_home'</span>
-  <span class="ky">alias</span>: <span class="vl">Set house mode to Home on arrival</span>
-  <span class="ky">trigger</span>:
-    - <span class="ky">platform</span>: <span class="vl">state</span>
-      <span class="ky">entity_id</span>: <span class="vl">person.your_name</span>
-      <span class="ky">to</span>: <span class="vl">home</span>
-  <span class="ky">action</span>:
-    - <span class="ky">service</span>: <span class="vl">input_select.select_option</span>
-      <span class="ky">target</span>:
-        <span class="ky">entity_id</span>: <span class="vl">input_select.house_mode</span>
-      <span class="ky">data</span>:
-        <span class="ky">option</span>: <span class="vl">Home</span>
-
-- <span class="ky">id</span>: <span class="vl">'leave_home'</span>
-  <span class="ky">alias</span>: <span class="vl">Set house mode to Away on departure</span>
-  <span class="ky">trigger</span>:
-    - <span class="ky">platform</span>: <span class="vl">state</span>
-      <span class="ky">entity_id</span>: <span class="vl">person.your_name</span>
-      <span class="ky">to</span>: <span class="vl">not_home</span>
-      <span class="ky">for</span>: <span class="vl">"00:02:00"</span>
-  <span class="ky">action</span>:
-    - <span class="ky">service</span>: <span class="vl">input_select.select_option</span>
-      <span class="ky">target</span>:
-        <span class="ky">entity_id</span>: <span class="vl">input_select.house_mode</span>
-      <span class="ky">data</span>:
-        <span class="ky">option</span>: <span class="vl">Away</span></div>
+  <div class="divider">Hosts &amp; IPs</div>
+  <div class="net-row">
+    <p class="net-host">Proxmox host</p>
+    <p class="net-ip">192.168.1.10</p>
+    <p class="net-svc">https://192.168.1.10:8006 — Proxmox web UI</p>
+  </div>
+  <div class="net-row">
+    <p class="net-host">Windows 11 VM</p>
+    <p class="net-ip">192.168.1.11</p>
+    <p class="net-svc">Desktop — no web service</p>
+  </div>
+  <div class="net-row">
+    <p class="net-host">Docker LXC (nas)</p>
+    <p class="net-ip">192.168.1.20</p>
+    <p class="net-svc">Portainer :9000 · NPM :81 · Jellyfin :8096 · Duplicati :8200</p>
+  </div>
+  <div class="net-row">
+    <p class="net-host">Home Assistant VM</p>
+    <p class="net-ip">192.168.1.30</p>
+    <p class="net-svc">http://192.168.1.30:8123 · Zigbee2MQTT :8099</p>
   </div>
 
-  <div class="acard">
-    <p class="atitle">Adaptive lighting — follow sunrise/sunset <span class="badge bk">Essential</span></p>
-    <p class="adesc">Lights on 20 minutes before sunset, dimmed at 10 PM. Uses built-in sun entity — no API key needed.</p>
-    <div class="fb">- <span class="ky">id</span>: <span class="vl">'sunset_lights'</span>
-  <span class="ky">alias</span>: <span class="vl">Lights on at sunset</span>
-  <span class="ky">trigger</span>:
-    - <span class="ky">platform</span>: <span class="vl">sun</span>
-      <span class="ky">event</span>: <span class="vl">sunset</span>
-      <span class="ky">offset</span>: <span class="vl">"-00:20:00"</span>
-  <span class="ky">condition</span>:
-    - <span class="ky">condition</span>: <span class="vl">state</span>
-      <span class="ky">entity_id</span>: <span class="vl">input_select.house_mode</span>
-      <span class="ky">state</span>: <span class="vl">Home</span>
-  <span class="ky">action</span>:
-    - <span class="ky">service</span>: <span class="vl">light.turn_on</span>
-      <span class="ky">target</span>:
-        <span class="ky">area_id</span>: <span class="vl">living_room</span>
-      <span class="ky">data</span>:
-        <span class="ky">brightness_pct</span>: <span class="vl">80</span>
-        <span class="ky">color_temp_kelvin</span>: <span class="vl">3000</span>
+  <div class="divider">Samba Windows Drive Mappings</div>
+  <table class="tbl">
+    <tr><th>Share</th><th>SMB Path</th><th>Drive Letter in Windows VM</th></tr>
+    <tr><td>Projects</td><td>\\192.168.1.20\Projects</td><td>Z: — video editing</td></tr>
+    <tr><td>Media</td><td>\\192.168.1.20\Media</td><td>Y: — films and TV</td></tr>
+    <tr><td>Documents</td><td>\\192.168.1.20\Documents</td><td>X:</td></tr>
+    <tr><td>Backups</td><td>\\192.168.1.20\Backups</td><td>— (backup destination only)</td></tr>
+  </table>
 
-- <span class="ky">id</span>: <span class="vl">'late_night_dim'</span>
-  <span class="ky">alias</span>: <span class="vl">Dim lights at 10pm</span>
-  <span class="ky">trigger</span>:
-    - <span class="ky">platform</span>: <span class="vl">time</span>
-      <span class="ky">at</span>: <span class="vl">"22:00:00"</span>
-  <span class="ky">action</span>:
-    - <span class="ky">service</span>: <span class="vl">light.turn_on</span>
-      <span class="ky">target</span>:
-        <span class="ky">area_id</span>: <span class="vl">living_room</span>
-      <span class="ky">data</span>:
-        <span class="ky">brightness_pct</span>: <span class="vl">30</span>
-        <span class="ky">color_temp_kelvin</span>: <span class="vl">2200</span></div>
-  </div>
-
-  <div class="acard">
-    <p class="atitle">Away mode — everything off when you leave <span class="badge bn">Security</span></p>
-    <div class="fb">- <span class="ky">id</span>: <span class="vl">'away_mode_on'</span>
-  <span class="ky">alias</span>: <span class="vl">Away mode — turn off everything</span>
-  <span class="ky">trigger</span>:
-    - <span class="ky">platform</span>: <span class="vl">state</span>
-      <span class="ky">entity_id</span>: <span class="vl">input_select.house_mode</span>
-      <span class="ky">to</span>: <span class="vl">Away</span>
-  <span class="ky">action</span>:
-    - <span class="ky">service</span>: <span class="vl">light.turn_off</span>
-      <span class="ky">target</span>:
-        <span class="ky">entity_id</span>: <span class="vl">all</span>
-    - <span class="ky">service</span>: <span class="vl">climate.set_preset_mode</span>
-      <span class="ky">target</span>:
-        <span class="ky">entity_id</span>: <span class="vl">climate.thermostat</span>
-      <span class="ky">data</span>:
-        <span class="ky">preset_mode</span>: <span class="vl">away</span>
-    - <span class="ky">service</span>: <span class="vl">lock.lock</span>
-      <span class="ky">target</span>:
-        <span class="ky">entity_id</span>: <span class="vl">lock.front_door</span>
-    - <span class="ky">service</span>: <span class="vl">notify.mobile_app_your_phone</span>
-      <span class="ky">data</span>:
-        <span class="ky">message</span>: <span class="vl">Away mode on. Lights off, door locked.</span></div>
-  </div>
-
-  <div class="acard">
-    <p class="atitle">Morning routine — gradual wake-up weekdays <span class="badge bn">Comfort</span></p>
-    <div class="fb">- <span class="ky">id</span>: <span class="vl">'morning_routine'</span>
-  <span class="ky">alias</span>: <span class="vl">Morning routine weekdays</span>
-  <span class="ky">trigger</span>:
-    - <span class="ky">platform</span>: <span class="vl">time</span>
-      <span class="ky">at</span>: <span class="vl">"06:30:00"</span>
-  <span class="ky">condition</span>:
-    - <span class="ky">condition</span>: <span class="vl">time</span>
-      <span class="ky">weekday</span>: [<span class="vl">mon, tue, wed, thu, fri</span>]
-    - <span class="ky">condition</span>: <span class="vl">state</span>
-      <span class="ky">entity_id</span>: <span class="vl">input_select.house_mode</span>
-      <span class="ky">state</span>: <span class="vl">Home</span>
-  <span class="ky">action</span>:
-    - <span class="ky">service</span>: <span class="vl">light.turn_on</span>
-      <span class="ky">target</span>:
-        <span class="ky">entity_id</span>: <span class="vl">light.bedroom</span>
-      <span class="ky">data</span>:
-        <span class="ky">brightness_pct</span>: <span class="vl">1</span>
-        <span class="ky">transition</span>: <span class="vl">1200</span>  <span class="cm"># 20 min sunrise</span>
-    - <span class="ky">delay</span>: <span class="vl">"00:30:00"</span>
-    - <span class="ky">service</span>: <span class="vl">switch.turn_on</span>
-      <span class="ky">target</span>:
-        <span class="ky">entity_id</span>: <span class="vl">switch.coffee_maker</span></div>
-  </div>
-
-  <div class="acard">
-    <p class="atitle">Server and backup alerts <span class="badge bw">Monitoring</span></p>
-    <div class="fb">- <span class="ky">id</span>: <span class="vl">'disk_alert'</span>
-  <span class="ky">alias</span>: <span class="vl">Alert on low NAS disk space</span>
-  <span class="ky">trigger</span>:
-    - <span class="ky">platform</span>: <span class="vl">numeric_state</span>
-      <span class="ky">entity_id</span>: <span class="vl">sensor.disk_use_percent_mnt_datapool</span>
-      <span class="ky">above</span>: <span class="vl">85</span>
-  <span class="ky">action</span>:
-    - <span class="ky">service</span>: <span class="vl">notify.mobile_app_your_phone</span>
-      <span class="ky">data</span>:
-        <span class="ky">title</span>: <span class="vl">NAS storage warning</span>
-        <span class="ky">message</span>: <span class="vl">Pool is over 85% full.</span>
-
-- <span class="ky">id</span>: <span class="vl">'backup_fail'</span>
-  <span class="ky">alias</span>: <span class="vl">Notify on backup failure</span>
-  <span class="ky">trigger</span>:
-    - <span class="ky">platform</span>: <span class="vl">webhook</span>
-      <span class="ky">webhook_id</span>: <span class="vl">duplicati-alert</span>
-  <span class="ky">action</span>:
-    - <span class="ky">service</span>: <span class="vl">notify.mobile_app_your_phone</span>
-      <span class="ky">data</span>:
-        <span class="ky">title</span>: <span class="vl">Backup failed</span>
-        <span class="ky">message</span>: <span class="vl">Check http://192.168.1.20:8200</span></div>
-  </div>
+  <div class="divider">Intel i225-V NIC — Dedicated NAS Interface</div>
+  <p style="font-size:13px;color:var(--text2);margin-top:10px;line-height:1.65;">The Intel i225-V adds a dedicated 2.5GbE port for NAS traffic. In Proxmox, create a second Linux bridge (<span class="ic">vmbr1</span>) on this interface and bind the Docker LXC's network interface to it for isolated, high-throughput NAS transfers — separate from VM management traffic on vmbr0.</p>
 </div>
 
-<!-- HA INTEGRATIONS -->
-<div class="section" id="s-haint">
-  <p class="sec-title">Home Assistant — integrations &amp; notifications</p>
-  <p class="sec-sub">Mobile app, rich push notifications with action buttons, Proxmox monitoring, and energy tracking.</p>
+<!-- ══ POWER BUDGET ══ -->
+<div class="section" id="s-power">
+  <p class="sec-title">Power budget</p>
+  <p class="sec-sub">Corsair RM750x 750W PSU. Phase 1 runs very efficiently — power draw nearly doubles only when the GPU arrives in Phase 2.</p>
 
-  <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">HA Companion App — what it gives you</p>
-    <div class="cb">GPS presence detection  — triggers arrive/leave automations
-Push notifications      — images, sound, action buttons
-Device sensors          — battery, wifi, step count, screen state
-Home screen widgets     — iOS/Android controls
-Siri/Google Assistant   — voice commands for HA</div>
-    <div class="tip">Enable Background Location permission — this is what makes presence detection reliable. Set your home zone radius to about 150 meters in HA Settings → Zones.</div>
-  </div></div>
+  <table class="tbl">
+    <tr><th>Scenario</th><th>Est. Draw</th><th>PSU Load %</th><th>UPS Runtime (1500VA)</th></tr>
+    <tr><td>Phase 1 idle (no GPU)</td><td>~80W</td><td>11%</td><td>—</td></tr>
+    <tr><td>Phase 1 peak (no GPU)</td><td>~150W</td><td>20%</td><td>—</td></tr>
+    <tr><td>Phase 2 idle (with GPU)</td><td>~150W</td><td>20%</td><td>~60 min</td></tr>
+    <tr><td>Phase 2 peak (GPU rendering)</td><td>~450W</td><td>60%</td><td>~12–15 min</td></tr>
+  </table>
 
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Rich push notification with action buttons</p>
-    <div class="fb">- <span class="ky">id</span>: <span class="vl">'doorbell'</span>
-  <span class="ky">alias</span>: <span class="vl">Doorbell — snapshot and notify</span>
-  <span class="ky">trigger</span>:
-    - <span class="ky">platform</span>: <span class="vl">state</span>
-      <span class="ky">entity_id</span>: <span class="vl">binary_sensor.doorbell_button</span>
-      <span class="ky">to</span>: <span class="vl">"on"</span>
-  <span class="ky">action</span>:
-    - <span class="ky">service</span>: <span class="vl">camera.snapshot</span>
-      <span class="ky">target</span>:
-        <span class="ky">entity_id</span>: <span class="vl">camera.front_door</span>
-      <span class="ky">data</span>:
-        <span class="ky">filename</span>: <span class="vl">/config/snapshots/doorbell.jpg</span>
-    - <span class="ky">service</span>: <span class="vl">notify.mobile_app_your_phone</span>
-      <span class="ky">data</span>:
-        <span class="ky">title</span>: <span class="vl">Someone at the door</span>
-        <span class="ky">message</span>: <span class="vl">Front door</span>
-        <span class="ky">data</span>:
-          <span class="ky">image</span>: <span class="vl">/config/snapshots/doorbell.jpg</span>
-          <span class="ky">actions</span>:
-            - <span class="ky">action</span>: <span class="vl">UNLOCK_DOOR</span>
-              <span class="ky">title</span>: <span class="vl">Unlock door</span></div>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Monitor Proxmox from Home Assistant</p>
-    <p class="sd">Generate a read-only API token: Proxmox → Datacenter → Permissions → API Tokens.</p>
-    <div class="fb"><span class="ky">sensor</span>:
-  - <span class="ky">platform</span>: <span class="vl">rest</span>
-    <span class="ky">name</span>: <span class="vl">Proxmox CPU Load</span>
-    <span class="ky">resource</span>: <span class="vl">https://192.168.1.10:8006/api2/json/nodes/pve/status</span>
-    <span class="ky">verify_ssl</span>: <span class="vl">false</span>
-    <span class="ky">headers</span>:
-      <span class="ky">Authorization</span>: <span class="vl">PVEAPIToken=root@pam!hatoken=YOUR-TOKEN</span>
-    <span class="ky">value_template</span>: <span class="vl">"{{ value_json.data.cpu | round(2) }}"</span>
-    <span class="ky">unit_of_measurement</span>: <span class="vl">"%"</span>
-    <span class="ky">scan_interval</span>: <span class="vl">60</span></div>
-  </div></div>
-
-  <div class="step"><div class="sn ok">4</div><div class="sb">
-    <p class="sh">Energy monitoring</p>
-    <p class="sd">Add a smart plug with energy monitoring to your server's power circuit (Shelly Plug S, TP-Link Kasa EP25). Settings → Energy → Add individual device. HA builds a full dashboard showing kWh, daily cost, and monthly trends — shows exactly what 24/7 operation costs.</p>
-  </div></div>
+  <div class="tip">The APC Back-UPS Pro 1500VA is added in Phase 2 when power draw nearly doubles. Sizing it once for the full system avoids replacing a smaller UPS later.</div>
 </div>
 
-<!-- DUPLICATI -->
-<div class="section" id="s-dup">
-  <p class="sec-title">Duplicati — backup setup</p>
-  <p class="sec-sub">3-2-1 backup strategy: 3 copies, 2 different media, 1 offsite. Duplicati encrypts everything before it leaves your machine and supports dozens of storage backends.</p>
+<!-- ══ STORAGE EXPANSION ══ -->
+<div class="section" id="s-storage_expansion">
+  <p class="sec-title">Storage expansion</p>
+  <p class="sec-sub">The Fractal Define 7 supports up to 14× 3.5" drives in storage layout. The MSI B650 has 4× SATA ports — drives 5+ require a PCIe SATA expansion card.</p>
 
-  <div class="divider">Backup jobs to create</div>
+  <table class="tbl">
+    <tr><th>Stage</th><th>Drives</th><th>ZFS Config</th><th>Usable</th><th>Failure Tolerance</th></tr>
+    <tr><td>Launch</td><td>2× 8TB</td><td>Mirror (RAID-1)</td><td>8TB</td><td>1 drive</td></tr>
+    <tr><td>Expand</td><td>3× 8TB</td><td>RAID-Z1</td><td>16TB</td><td>1 drive</td></tr>
+    <tr><td>Protect</td><td>4× 8TB</td><td>RAID-Z2</td><td>16TB</td><td>2 drives</td></tr>
+    <tr><td>Grow</td><td>6× 8TB</td><td>RAID-Z2</td><td>32TB</td><td>2 drives</td></tr>
+    <tr><td>Future</td><td>6× 16TB</td><td>RAID-Z2</td><td>64TB</td><td>2 drives</td></tr>
+  </table>
 
-  <div class="acard">
-    <p class="atitle">Job 1 — Video projects to external USB drive <span class="badge bw">High priority</span></p>
-    <div class="bkrow"><span class="bkk">Source</span><span class="bkv">/source/projects</span></div>
-    <div class="bkrow"><span class="bkk">Destination</span><span class="bkv">Local folder — /backups/external-drive/projects</span></div>
-    <div class="bkrow"><span class="bkk">Schedule</span><span class="bkv">Daily at 02:00</span></div>
-    <div class="bkrow"><span class="bkk">Retention</span><span class="bkv">1 per day for 30 days, 1 per week for 12 weeks</span></div>
-    <div class="bkrow"><span class="bkk">Encryption</span><span class="bkv">AES-256 — store passphrase in a password manager, never on this machine</span></div>
-  </div>
-
-  <div class="acard">
-    <p class="atitle">Job 2 — Documents to Backblaze B2 (offsite) <span class="badge bn">Offsite</span></p>
-    <div class="bkrow"><span class="bkk">Source</span><span class="bkv">/source/documents</span></div>
-    <div class="bkrow"><span class="bkk">Destination</span><span class="bkv">Backblaze B2 — see Backblaze B2 section</span></div>
-    <div class="bkrow"><span class="bkk">Schedule</span><span class="bkv">Daily at 03:00</span></div>
-    <div class="bkrow"><span class="bkk">Retention</span><span class="bkv">1/day 14 days · 1/week 8 weeks · 1/month 12 months</span></div>
-    <div class="bkrow"><span class="bkk">Throttle</span><span class="bkv">upload-speed: 5mb to avoid saturating your internet connection</span></div>
-  </div>
-
-  <div class="acard">
-    <p class="atitle">Job 3 — Home Assistant config <span class="badge bk">Config</span></p>
-    <div class="bkrow"><span class="bkk">Source</span><span class="bkv">HA Samba Backup add-on → writes to /mnt/backups/homeassistant</span></div>
-    <div class="bkrow"><span class="bkk">Schedule</span><span class="bkv">Every 6 hours</span></div>
-    <div class="bkrow"><span class="bkk">Retention</span><span class="bkv">Keep 48 copies (12 days of 6-hourly backups)</span></div>
-  </div>
-
-  <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Mount external USB drive into LXC container</p>
-    <div class="cb"><span class="cm"># On Proxmox host</span>
-mkdir -p /mnt/external-backup
-mount /dev/sdc1 /mnt/external-backup
-echo "UUID=$(blkid -s UUID -o value /dev/sdc1) \
-  /mnt/external-backup ext4 defaults,nofail 0 2" >> /etc/fstab
-echo "mp5: /mnt/external-backup,mp=/backups/external-drive" \
-  >> /etc/pve/lxc/200.conf</div>
-  </div></div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Notify Home Assistant on backup failure</p>
-    <p class="sd">In Duplicati → Edit job → Options → Advanced options:</p>
-    <div class="cb"><span class="ky">send-http-url</span>:   http://192.168.1.30:8123/api/webhook/duplicati-alert
-<span class="ky">send-http-verb</span>:  POST
-<span class="ky">send-http-level</span>: Warning, Error, Fatal</div>
-    <div class="warn-box">Set this up for every job when you create it — not as an afterthought. A backup that silently fails for months is useless.</div>
-  </div></div>
-
-  <div class="step"><div class="sn ok">3</div><div class="sb">
-    <p class="sh">Test restore — do this immediately after first backup</p>
-    <div class="cb"><span class="cm"># In Duplicati UI → Restore → select a specific file</span>
-<span class="cm"># Restore to: /tmp/restore-test</span>
-<span class="cm"># Verify the file opens correctly</span>
-<span class="cm"># Delete /tmp/restore-test</span>
-<span class="cm"># Repeat every 3 months — calendar reminder</span></div>
-  </div></div>
+  <div class="warn-box">ZFS does not support changing RAID level in-place (e.g. Mirror → RAID-Z1). Expansion is done by creating a new pool and migrating data, or by adding a new vdev to an existing pool. Plan your topology upfront.</div>
 </div>
 
-<!-- BACKBLAZE B2 -->
-<div class="section" id="s-b2">
-  <p class="sec-title">Backblaze B2 — cloud backup</p>
-  <p class="sec-sub">Backblaze B2 is ~$6/TB/month with no egress fees to Cloudflare. The cheapest reliable offsite storage available. Protects against fire, theft and catastrophic hardware failure.</p>
-
-  <div class="step"><div class="sn">1</div><div class="sb">
-    <p class="sh">Create B2 account and bucket</p>
-    <div class="cb"><span class="cm"># backblaze.com → B2 Cloud Storage → Create a Bucket</span>
-Bucket name: your-home-backup-2026  <span class="cm"># globally unique</span>
-Files in Bucket: Private
-Default Encryption: Enabled
-
-<span class="cm"># Create Application Key</span>
-Key Name: duplicati-home
-Access: Read and Write to your bucket only
-<span class="cm"># Copy keyID and applicationKey — shown ONCE</span></div>
-    <div class="warn-box">Copy the applicationKey immediately when shown — Backblaze only displays it once. Store it in your password manager alongside your Duplicati encryption passphrase.</div>
-  </div></div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">Lifecycle rules — auto-delete old versions</p>
-    <div class="cb"><span class="cm"># B2 bucket → Lifecycle Rules</span>
-Files matching: *
-Action: Delete versions older than: 90 days
-<span class="cm"># Duplicati manages retention within this window</span>
-<span class="cm"># This is a safety net to prevent silent cost accumulation</span></div>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">Configure B2 in Duplicati</p>
-    <div class="cb"><span class="ky">Storage Type:</span>      B2 Cloud Storage
-<span class="ky">BucketName:</span>        your-home-backup-2026
-<span class="ky">AccountID:</span>         [your B2 keyID]
-<span class="ky">ApplicationKey:</span>    [your B2 applicationKey]
-<span class="ky">Folder path:</span>       /documents
-
-<span class="cm"># Advanced options:</span>
-<span class="ky">upload-speed</span>: 5mb
-<span class="ky">throttle-upload</span>: 5mb
-
-<span class="cm"># Click "Test connection" → should show "Connection worked!"</span></div>
-  </div></div>
-
-  <div class="step"><div class="sn ok">4</div><div class="sb">
-    <p class="sh">Cost estimate and full 3-2-1 summary</p>
-    <div class="cb"><span class="cm"># Estimated monthly B2 cost</span>
-Documents (50 GB)     ~$0.30/month
-HA config (1 GB)      ~$0.01/month
-Projects (200 GB)     ~$1.20/month
-Total:                ~$1.50 – $5/month
-
-<span class="cm"># Full 3-2-1 strategy</span>
-<span class="ky">Copy 1:</span>  ZFS RAID 1 on IronWolf drives — primary, redundant, instant
-<span class="ky">Copy 2:</span>  Duplicati → USB external drive — nightly, 30-day retention
-<span class="ky">Copy 3:</span>  Duplicati → Backblaze B2 — nightly, 90-day, offsite, encrypted
-<span class="ky">Alerts:</span>  HA webhook on any failure → push notification
-<span class="ky">Testing:</span> Full restore test every 3 months</div>
-    <div class="tip">Don't back up your full media library to B2 — expensive and slow to restore. Back up only irreplaceable data: documents, projects, photos, HA config. Media can be re-downloaded or re-ripped.</div>
-  </div></div>
-</div>
-
-<!-- MAINTENANCE -->
-<div class="section" id="s-maintenance">
-  <p class="sec-title">Ongoing maintenance</p>
-  <p class="sec-sub">Regular tasks that keep the stack healthy, secure and backed up. A well-maintained Proxmox server runs for years without issues.</p>
-
-  <div class="divider">Weekly (automated)</div>
-
-  <div class="step"><div class="sn ok">1</div><div class="sb">
-    <p class="sh">Proxmox VM backup schedule</p>
-    <p class="sd">Datacenter → Backup → Add. Configure to back up all VMs to datapool/backups every Sunday at 02:00. Retention: keep 3 copies. This is separate from ZFS snapshots — a full VM restore point.</p>
-    <div class="cb">vzdump 100 101 200 --storage datapool --compress zstd --mode snapshot</div>
-  </div></div>
-
-  <div class="divider">Monthly</div>
-
-  <div class="step"><div class="sn">2</div><div class="sb">
-    <p class="sh">System updates</p>
-    <div class="cb"><span class="cm"># Proxmox host</span>
-apt update &amp;&amp; apt dist-upgrade -y
-
-<span class="cm"># Inside LXC container</span>
-apt update &amp;&amp; apt upgrade -y
-
-<span class="cm"># Docker containers (manual pull to review changes)</span>
-cd /opt/docker/nginx-proxy &amp;&amp; docker compose pull &amp;&amp; docker compose up -d
-cd /opt/docker/jellyfin    &amp;&amp; docker compose pull &amp;&amp; docker compose up -d
-cd /opt/docker/duplicati   &amp;&amp; docker compose pull &amp;&amp; docker compose up -d
-docker system prune -f</div>
-  </div></div>
-
-  <div class="step"><div class="sn">3</div><div class="sb">
-    <p class="sh">ZFS health check</p>
-    <div class="cb">zpool status -v datapool       <span class="cm"># full health — look for ONLINE</span>
-zfs list -r -o name,used,avail,refer datapool  <span class="cm"># dataset usage</span>
-zpool scrub datapool           <span class="cm"># kick off a manual scrub</span></div>
-    <div class="warn-box">If you ever see "DEGRADED" — a drive has failed. Replace it immediately. ZFS RAID 1 protects your data during the failure but you have zero redundancy until the new drive rebuilds.</div>
-  </div></div>
-
-  <div class="step"><div class="sn">4</div><div class="sb">
-    <p class="sh">Replace a failed drive</p>
-    <div class="cb"><span class="cm"># Identify failed drive</span>
-zpool status datapool
-
-<span class="cm"># Power down → replace drive → power on → resilver</span>
-zpool replace datapool \
-  /dev/disk/by-id/OLD_DRIVE_ID \
-  /dev/disk/by-id/NEW_DRIVE_ID
-
-<span class="cm"># Monitor resilver — typically 4–8 hrs for 8TB</span>
-zpool status datapool</div>
-  </div></div>
-
-  <div class="step"><div class="sn ok">5</div><div class="sb">
-    <p class="sh">Restore test reminder</p>
-    <div class="cb"><span class="cm"># Every 3 months — test restore from Duplicati</span>
-<span class="cm"># Duplicati UI → Restore → select a file → restore to /tmp/restore-test</span>
-<span class="cm"># Verify file integrity → delete /tmp/restore-test</span>
-
-<span class="cm"># Also test: restore one file from a ZFS snapshot</span>
-ls /datapool/projects/.zfs/snapshot/
-cp /datapool/projects/.zfs/snapshot/SNAPSHOT_NAME/filename.ext /tmp/</div>
-  </div></div>
-</div>
-
-<!-- REFERENCE -->
+<!-- ══ QUICK REFERENCE ══ -->
 <div class="section" id="s-reference">
   <p class="sec-title">Quick reference</p>
-  <p class="sec-sub">All service addresses, IP assignments and key credentials in one place. Bookmark this section.</p>
+  <p class="sec-sub">Common commands and URLs for daily operation.</p>
 
-  <div class="divider">Network IP assignments</div>
-  <div class="url-grid">
-    <div class="url-row"><span class="url-label">Proxmox host</span><span class="url-val">192.168.1.10</span></div>
-    <div class="url-row"><span class="url-label">Windows 11 VM</span><span class="url-val">192.168.1.11</span></div>
-    <div class="url-row"><span class="url-label">Docker LXC (nas)</span><span class="url-val">192.168.1.20</span></div>
-    <div class="url-row"><span class="url-label">Home Assistant VM</span><span class="url-val">192.168.1.30</span></div>
-  </div>
+  <div class="divider">Proxmox CLI Commands</div>
+  <div class="cb"><span class="cm"># List all VMs and containers</span>
+qm list && pct list
 
-  <div class="divider">Service web UIs</div>
-  <div class="url-grid">
-    <div class="url-row"><span class="url-label">Proxmox web UI</span><span class="url-val">https://192.168.1.10:8006</span></div>
-    <div class="url-row"><span class="url-label">Portainer</span><span class="url-val">http://192.168.1.20:9000</span></div>
-    <div class="url-row"><span class="url-label">Nginx Proxy Manager</span><span class="url-val">http://192.168.1.20:81</span></div>
-    <div class="url-row"><span class="url-label">Jellyfin</span><span class="url-val">http://192.168.1.20:8096</span></div>
-    <div class="url-row"><span class="url-label">Duplicati</span><span class="url-val">http://192.168.1.20:8200</span></div>
-    <div class="url-row"><span class="url-label">Home Assistant</span><span class="url-val">http://192.168.1.30:8123</span></div>
-    <div class="url-row"><span class="url-label">Zigbee2MQTT</span><span class="url-val">http://192.168.1.30:8099</span></div>
-  </div>
+<span class="cm"># Start / stop / restart VM</span>
+qm start 100 | qm stop 100 | qm reboot 100
 
-  <div class="divider">File shares</div>
-  <div class="url-grid">
-    <div class="url-row"><span class="url-label">Projects (SMB)</span><span class="url-val">\\192.168.1.20\Projects</span></div>
-    <div class="url-row"><span class="url-label">Media (SMB)</span><span class="url-val">\\192.168.1.20\Media</span></div>
-    <div class="url-row"><span class="url-label">Documents (SMB)</span><span class="url-val">\\192.168.1.20\Documents</span></div>
-    <div class="url-row"><span class="url-label">Backups (SMB)</span><span class="url-val">\\192.168.1.20\Backups</span></div>
-    <div class="url-row"><span class="url-label">NFS media</span><span class="url-val">192.168.1.20:/mnt/media</span></div>
-  </div>
+<span class="cm"># Start / stop LXC container</span>
+pct start 200 | pct stop 200
 
-  <div class="divider">ZFS quick commands</div>
-  <div class="cb">zpool status datapool          <span class="cm"># pool health</span>
-zfs list -r datapool          <span class="cm"># dataset sizes</span>
-zpool scrub datapool          <span class="cm"># start scrub</span>
-zfs list -t snapshot datapool <span class="cm"># list snapshots</span>
-zfs rollback datapool/projects@SNAPSHOT  <span class="cm"># rollback dataset</span>
-ls /datapool/projects/.zfs/snapshot/     <span class="cm"># browse snapshots</span></div>
+<span class="cm"># Shell into LXC</span>
+pct enter 200
 
-  <div class="divider">Docker quick commands (run inside LXC container)</div>
-  <div class="cb">docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-docker logs -f container_name
-docker compose pull &amp;&amp; docker compose up -d
-docker system prune -f</div>
+<span class="cm"># ZFS pool status</span>
+zpool status datapool
 
-  <div class="divider">Build spec summary</div>
-  <div class="spec-grid">
-    <div class="spec-card"><p class="sc-label">CPU</p><p class="sc-val">Ryzen 5 5600 (owned)</p></div>
-    <div class="spec-card"><p class="sc-label">Motherboard</p><p class="sc-val">MSI B550-A PRO ~$100</p></div>
-    <div class="spec-card"><p class="sc-label">RAM</p><p class="sc-val">32GB DDR4-3200 ~$60</p></div>
-    <div class="spec-card"><p class="sc-label">GPU</p><p class="sc-val">RTX 4070 Ti Super 16GB ~$650</p></div>
-    <div class="spec-card"><p class="sc-label">Boot SSD</p><p class="sc-val">WD SN580 1TB NVMe ~$58</p></div>
-    <div class="spec-card"><p class="sc-label">NAS drives</p><p class="sc-val">2× IronWolf 8TB ~$320</p></div>
-    <div class="spec-card"><p class="sc-label">PSU</p><p class="sc-val">Corsair RM750x 80+ Gold ~$110</p></div>
-    <div class="spec-card"><p class="sc-label">Case</p><p class="sc-val">Fractal Focus 2 ~$70</p></div>
-    <div class="spec-card"><p class="sc-label">NIC</p><p class="sc-val">Intel i225-V 2.5GbE ~$30</p></div>
-    <div class="spec-card"><p class="sc-label">Total</p><p class="sc-val">~$1,398</p></div>
-    <div class="spec-card"><p class="sc-label">OS</p><p class="sc-val">Proxmox VE 8.x (free)</p></div>
-    <div class="spec-card"><p class="sc-label">Storage</p><p class="sc-val">ZFS RAID 1 — 8TB usable</p></div>
-  </div>
+<span class="cm"># ZFS disk usage</span>
+zfs list
+
+<span class="cm"># View Proxmox task log</span>
+journalctl -u pvedaemon -f</div>
+
+  <div class="divider">Docker Commands (inside LXC)</div>
+  <div class="cb"><span class="cm"># Show running containers</span>
+docker ps
+
+<span class="cm"># Restart all services</span>
+cd /opt/docker && docker compose restart
+
+<span class="cm"># Update all container images</span>
+docker compose pull && docker compose up -d
+
+<span class="cm"># View logs</span>
+docker compose logs -f [service]
+
+<span class="cm"># Remove unused images</span>
+docker image prune -f</div>
+
+  <div class="divider">Key Design Decisions</div>
+  <table class="tbl">
+    <tr><th>Decision</th><th>Reason</th></tr>
+    <tr><td>AM5 over AM4</td><td>Every Ryzen 7000 CPU has RDNA 2 iGPU — Proxmox console stays on iGPU permanently, GPU passes cleanly to Windows VM. DDR5 bandwidth benefits 4K editing. Platform supported through 2027+.</td></tr>
+    <tr><td>Ryzen 9 7900 (not 7900X)</td><td>65W TDP, Wraith Prism included, same 12 cores as 7900X, ~$120 cheaper. Stock cooler handles 65W fine for 24/7 server use.</td></tr>
+    <tr><td>2×32GB DDR5 (not 4×16GB)</td><td>Leaves 2 DIMM slots free for future 128GB upgrade. Same cost as 4×16GB but preserves expandability.</td></tr>
+    <tr><td>Two NVMe drives</td><td>500GB dedicated to Windows VM isolates I/O from Proxmox host. Better DaVinci Resolve scratch performance.</td></tr>
+    <tr><td>Fractal Define 7</td><td>14× 3.5" bays vs. Focus 2's 4-bay ceiling. $80 more but removes the case as a storage bottleneck for the lifetime of the build.</td></tr>
+    <tr><td>750W PSU in Phase 1</td><td>Sized for Phase 2 GPU (RTX 4070 Ti Super 285W TDP). Replacing PSU later requires full teardown — buy right once.</td></tr>
+    <tr><td>UPS in Phase 2</td><td>Power draw nearly doubles when GPU arrives (~80W → ~150W idle). Size the UPS once for the full system.</td></tr>
+  </table>
+
+  <div class="divider">All Service URLs</div>
+  <div class="cb">Proxmox Web UI       →  https://192.168.1.10:8006
+Portainer (Docker)   →  http://192.168.1.20:9000
+Jellyfin             →  http://192.168.1.20:8096
+Nginx Proxy Manager  →  http://192.168.1.20:81
+Duplicati            →  http://192.168.1.20:8200
+Home Assistant       →  http://192.168.1.30:8123
+Zigbee2MQTT          →  http://192.168.1.30:8099</div>
+
+  <p style="font-size:11px;color:var(--text3);margin-top:24px;">Build guide — AM5 platform. All prices are estimates; shop Newegg, B&H, Amazon. Prices vary by date and region.</p>
 </div>
 
 </main>
@@ -1739,19 +1272,27 @@ docker system prune -f</div>
 <script>
 function nav(el, id) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  el.classList.add('active');
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
   document.getElementById('s-' + id).classList.add('active');
   window.scrollTo(0, 0);
 }
-function clTick() {
-  const boxes = document.querySelectorAll('#cl-items input[type=checkbox]');
-  const checked = [...boxes].filter(b => b.checked).length;
-  const total = boxes.length;
-  document.getElementById('cl-label').textContent = checked + ' of ' + total + ' confirmed';
-  document.getElementById('cl-fill').style.width = Math.round(checked / total * 100) + '%';
-  boxes.forEach(b => b.nextElementSibling.classList.toggle('done', b.checked));
-  document.getElementById('cl-done').style.display = checked === total ? 'block' : 'none';
+
+function toggleCheck(row) {
+  const cb = row.querySelector('input');
+  const label = row.querySelector('.chk-label');
+  cb.checked = !cb.checked;
+  label.classList.toggle('done', cb.checked);
+  updateProgress();
+}
+
+function updateProgress() {
+  const all = document.querySelectorAll('#s-checklist .chk-row input');
+  const done = document.querySelectorAll('#s-checklist .chk-row input:checked');
+  const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = done.length + ' of ' + all.length + ' completed';
+  document.getElementById('done-box').style.display = (done.length === all.length && all.length > 0) ? 'block' : 'none';
 }
 </script>
 </body>
