@@ -191,7 +191,11 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 
   <div class="nav-group">
     <p class="nav-group-label">Phase 7 — Network</p>
-    <div class="nav-item" onclick="nav(this,'networking')"><span class="nav-icon">🌐</span>IP &amp; services</div>
+    <div class="nav-item" onclick="nav(this,'netdesign')"><span class="nav-icon">🗺</span>Network design</div>
+    <div class="nav-item" onclick="nav(this,'unifi')"><span class="nav-icon">🔀</span>Unifi switch</div>
+    <div class="nav-item" onclick="nav(this,'bridges')"><span class="nav-icon">🌉</span>Proxmox bridges</div>
+    <div class="nav-item" onclick="nav(this,'firewall')"><span class="nav-icon">🔥</span>Firewall &amp; VLANs</div>
+    <div class="nav-item" onclick="nav(this,'portfwd')"><span class="nav-icon">🌍</span>Public port</div>
   </div>
 
   <div class="nav-group">
@@ -1126,44 +1130,565 @@ docker compose logs -f jellyfin</div>
   </div></div>
 </div>
 
-<!-- ══ NETWORKING ══ -->
-<div class="section" id="s-networking">
-  <p class="sec-title">IP assignments &amp; services</p>
-  <p class="sec-sub">Static IP assignments for all hosts. Set these as DHCP reservations in your router, or configure statically in each VM/LXC.</p>
+<!-- ══ NETWORKING — DESIGN ══ -->
+<div class="section" id="s-netdesign">
+  <p class="sec-title">Network design</p>
+  <p class="sec-sub">Before touching a single cable, draw the map. You will create three isolated network segments using your Unifi managed switch and Proxmox virtual bridges. Each segment has a purpose, an address range, and strict rules about what can talk to what.<br><br>
+  <strong>CompTIA Network+ reference:</strong> Domain 1 — Networking Concepts: 1.1 OSI model layers, 1.4 IP addressing &amp; CIDR notation, 1.6 VLAN concepts and network segmentation.</p>
 
-  <div class="divider">Hosts &amp; IPs</div>
-  <div class="net-row">
-    <p class="net-host">Proxmox host</p>
-    <p class="net-ip">192.168.1.10</p>
-    <p class="net-svc">https://192.168.1.10:8006 — Proxmox web UI</p>
+  <div class="divider">Why segment your network?</div>
+  <div class="step">
+    <div class="sn">💡</div>
+    <div class="sb">
+      <p class="sh">Security through separation</p>
+      <p class="sd">Network segmentation is a core CompTIA Security+ and Network+ principle. If a public-facing service is compromised, the attacker is trapped in the DMZ — they cannot reach your Windows VM or Home Assistant because the firewall blocks all lateral movement between segments.<br><br>
+      Think of it like a building: the lobby (DMZ) is open to visitors. The offices (Internal) are locked. The server room (Management) requires a key card and a PIN.</p>
+    </div>
   </div>
-  <div class="net-row">
-    <p class="net-host">Windows 11 VM</p>
-    <p class="net-ip">192.168.1.11</p>
-    <p class="net-svc">Desktop — no web service</p>
-  </div>
-  <div class="net-row">
-    <p class="net-host">Docker LXC (nas)</p>
-    <p class="net-ip">192.168.1.20</p>
-    <p class="net-svc">Portainer :9000 · NPM :81 · Jellyfin :8096 · Duplicati :8200</p>
-  </div>
-  <div class="net-row">
-    <p class="net-host">Home Assistant VM</p>
-    <p class="net-ip">192.168.1.30</p>
-    <p class="net-svc">http://192.168.1.30:8123 · Zigbee2MQTT :8099</p>
+  <div class="step">
+    <div class="sn">📐</div>
+    <div class="sb">
+      <p class="sh">Three-zone architecture</p>
+      <p class="sd">This build uses a classic three-zone model:<br>
+      • <strong>Management zone</strong> — the Proxmox hypervisor and Unifi switch itself. Locked down. Only you access this from your personal machine.<br>
+      • <strong>Internal/Trusted zone</strong> — your Windows 11 VM, Home Assistant, and private NAS shares. Reachable from your home LAN. Never exposed to the internet.<br>
+      • <strong>DMZ (De-Militarized Zone)</strong> — your Docker host running Nginx Proxy Manager, Jellyfin, and any public service. This is the only zone the internet can reach, and only on specific ports you choose.</p>
+      <div class="tip">📚 CompTIA Network+ 1.2 — A DMZ is a perimeter network that separates an internal network from an untrusted external network, typically the internet. It hosts services that must be publicly accessible while protecting the internal network from direct exposure.</div>
+    </div>
   </div>
 
-  <div class="divider">Samba Windows Drive Mappings</div>
-  <table class="tbl">
-    <tr><th>Share</th><th>SMB Path</th><th>Drive Letter in Windows VM</th></tr>
-    <tr><td>Projects</td><td>\\192.168.1.20\Projects</td><td>Z: — video editing</td></tr>
-    <tr><td>Media</td><td>\\192.168.1.20\Media</td><td>Y: — films and TV</td></tr>
-    <tr><td>Documents</td><td>\\192.168.1.20\Documents</td><td>X:</td></tr>
-    <tr><td>Backups</td><td>\\192.168.1.20\Backups</td><td>— (backup destination only)</td></tr>
+  <div class="divider">VLAN & IP addressing plan</div>
+  <div class="step">
+    <div class="sn">📋</div>
+    <div class="sb">
+      <p class="sh">What is a VLAN?</p>
+      <p class="sd">A <strong>Virtual Local Area Network (VLAN)</strong> is a logical subdivision of a physical network created at the switch level. Even though all devices share the same physical cables and switch, VLANs make them behave as if they are on completely separate switches.<br><br>
+      VLANs are defined by IEEE standard <strong>802.1Q</strong>, which adds a 4-byte tag to each Ethernet frame identifying which VLAN it belongs to. Unmanaged switches ignore these tags — only a managed switch like yours can read, write, and enforce them.</p>
+      <div class="tip">📚 CompTIA Network+ 1.6 — 802.1Q VLAN tagging allows a single physical switch port to carry traffic for multiple VLANs simultaneously (a trunk port), while access ports carry only a single VLAN and strip the tag before forwarding to the end device.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">🗂</div>
+    <div class="sb">
+      <p class="sh">IP addressing and CIDR notation</p>
+      <p class="sd">Each VLAN gets its own subnet — a block of IP addresses in a defined range. The <strong>/24</strong> notation (CIDR — Classless Inter-Domain Routing) means the first 24 bits of the address are the network portion and the remaining 8 bits are for hosts, giving you 254 usable addresses per subnet.</p>
+      <div class="tip">📚 CompTIA Network+ 1.4 — CIDR notation replaces the older class-based system. A /24 subnet has a mask of 255.255.255.0. The formula for usable hosts is 2ⁿ − 2 where n = number of host bits. For /24: 2⁸ − 2 = 254 hosts.</div>
+    </div>
+  </div>
+
+  <table class="tbl" style="margin-top:12px;">
+    <tr><th>VLAN ID</th><th>Name</th><th>Subnet</th><th>Gateway</th><th>Purpose</th></tr>
+    <tr><td><span class="ic">VLAN 1</span></td><td>Management</td><td>192.168.1.0/24</td><td>192.168.1.1</td><td>Proxmox host, Unifi switch, your PC. Never exposed externally.</td></tr>
+    <tr><td><span class="ic">VLAN 20</span></td><td>Internal</td><td>192.168.20.0/24</td><td>192.168.20.1</td><td>Windows 11 VM, Home Assistant, NAS access. Trusted zone — no internet inbound.</td></tr>
+    <tr><td><span class="ic">VLAN 30</span></td><td>DMZ</td><td>192.168.30.0/24</td><td>192.168.30.1</td><td>Docker host (Nginx Proxy Manager, Jellyfin, public web). Ports 80 &amp; 443 forwarded from router.</td></tr>
   </table>
 
-  <div class="divider">Intel i225-V NIC — Dedicated NAS Interface</div>
-  <p style="font-size:13px;color:var(--text2);margin-top:10px;line-height:1.65;">The Intel i225-V adds a dedicated 2.5GbE port for NAS traffic. In Proxmox, create a second Linux bridge (<span class="ic">vmbr1</span>) on this interface and bind the Docker LXC's network interface to it for isolated, high-throughput NAS transfers — separate from VM management traffic on vmbr0.</p>
+  <div class="divider">Static IP reservations</div>
+  <table class="tbl" style="margin-top:8px;">
+    <tr><th>Host</th><th>Interface</th><th>IP Address</th><th>VLAN</th></tr>
+    <tr><td>Proxmox host</td><td>vmbr0</td><td>192.168.1.10</td><td>VLAN 1 (Mgmt)</td></tr>
+    <tr><td>Windows 11 VM</td><td>vmbr1</td><td>192.168.20.11</td><td>VLAN 20 (Internal)</td></tr>
+    <tr><td>Home Assistant VM</td><td>vmbr1</td><td>192.168.20.30</td><td>VLAN 20 (Internal)</td></tr>
+    <tr><td>Docker LXC (nas)</td><td>vmbr2</td><td>192.168.30.20</td><td>VLAN 30 (DMZ)</td></tr>
+    <tr><td>Unifi switch</td><td>Mgmt</td><td>192.168.1.2</td><td>VLAN 1 (Mgmt)</td></tr>
+  </table>
+  <div class="warn-box">⚠️ Set these as DHCP reservations (binding MAC → IP) in your router, not as static IPs in each VM. This way the router is the single source of truth for all IP assignments.</div>
+</div>
+
+<!-- ══ NETWORKING — UNIFI ══ -->
+<div class="section" id="s-unifi">
+  <p class="sec-title">Unifi managed switch</p>
+  <p class="sec-sub">Your Unifi switch is a Layer 2 managed switch. You will configure it to understand your three VLANs, assign each physical port to the correct VLAN, and set up a trunk port that carries all three VLANs to the Proxmox server.<br><br>
+  <strong>CompTIA Network+ reference:</strong> Domain 2 — Network Infrastructure: 2.2 Compare and contrast Layer 2 and Layer 3 switches, trunk ports vs access ports, 802.1Q VLAN tagging.</p>
+
+  <div class="divider">Key concepts before you click anything</div>
+  <div class="step">
+    <div class="sn">1</div>
+    <div class="sb">
+      <p class="sh">Access port vs trunk port</p>
+      <p class="sd">These are the two modes a managed switch port can operate in:<br><br>
+      <strong>Access port</strong> — carries traffic for exactly one VLAN. The switch silently strips the 802.1Q tag before sending to the device. Your laptop, your smart TV, your desktop PC — these all connect to access ports. The device has no idea VLANs exist.<br><br>
+      <strong>Trunk port</strong> — carries traffic for multiple VLANs simultaneously. Every Ethernet frame includes its VLAN tag so the device on the other end (another switch, a router, a server running Proxmox) can sort traffic by VLAN. The port connecting your Unifi switch to the Proxmox server must be a trunk port.</p>
+      <div class="tip">📚 CompTIA Network+ 2.2 — Trunk ports use 802.1Q tagging to multiplex multiple VLANs on a single link. The "native VLAN" on a trunk is the VLAN whose traffic is sent untagged — typically VLAN 1 for management.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">2</div>
+    <div class="sb">
+      <p class="sh">Port profiles in Unifi</p>
+      <p class="sd">In the Unifi controller, a <strong>Port Profile</strong> is a template that defines whether a port is an access port (one VLAN) or a trunk port (multiple VLANs). You create the profiles once, then apply them to any physical port. This makes large deployments manageable.</p>
+    </div>
+  </div>
+
+  <div class="divider">Step-by-step: Create the VLANs</div>
+  <div class="step">
+    <div class="sn">3</div>
+    <div class="sb">
+      <p class="sh">Open the Unifi Network controller</p>
+      <p class="sd">Log into your Unifi controller (usually at <span class="ic">https://unifi.ui.com</span> or a local UniFi OS Console). Navigate to <strong>Settings → Networks</strong>.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">4</div>
+    <div class="sb">
+      <p class="sh">Create VLAN 20 — Internal</p>
+      <p class="sd">Click <strong>Create New Network</strong>.<br>
+      • Name: <span class="ic">Internal</span><br>
+      • VLAN ID: <span class="ic">20</span><br>
+      • Network type: <strong>VLAN Only</strong> (you are NOT creating a separate router subnet — just a L2 segment that Proxmox will bridge)<br>
+      • Leave DHCP off — Proxmox will handle routing or your router will if you set up inter-VLAN routing later<br>
+      Click <strong>Apply Changes</strong>.</p>
+      <div class="tip">📚 "VLAN Only" in Unifi means the controller creates the 802.1Q VLAN tag but does NOT provision a new DHCP scope or gateway on the Unifi Security Gateway. You are purely tagging traffic at Layer 2.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">5</div>
+    <div class="sb">
+      <p class="sh">Create VLAN 30 — DMZ</p>
+      <p class="sd">Click <strong>Create New Network</strong> again.<br>
+      • Name: <span class="ic">DMZ</span><br>
+      • VLAN ID: <span class="ic">30</span><br>
+      • Network type: <strong>VLAN Only</strong><br>
+      Click <strong>Apply Changes</strong>.</p>
+    </div>
+  </div>
+
+  <div class="divider">Step-by-step: Configure port profiles</div>
+  <div class="step">
+    <div class="sn">6</div>
+    <div class="sb">
+      <p class="sh">Navigate to Switching → Port Profiles</p>
+      <p class="sd">Go to <strong>Settings → Switching → Port Profiles</strong> (or <strong>Profiles</strong> under Networks depending on your controller version). You will create two profiles.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">7</div>
+    <div class="sb">
+      <p class="sh">Create profile: "Trunk — All VLANs"</p>
+      <p class="sd">This profile is for the uplink port connecting to your Proxmox server.<br>
+      • Name: <span class="ic">Trunk-All</span><br>
+      • Native Network: <span class="ic">Default (VLAN 1)</span><br>
+      • Tagged Networks: check <span class="ic">Internal (VLAN 20)</span> and <span class="ic">DMZ (VLAN 30)</span><br><br>
+      This tells the switch: carry all three VLANs on this port. VLAN 1 frames go untagged (native); VLAN 20 and 30 frames get their 802.1Q tags.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">8</div>
+    <div class="sb">
+      <p class="sh">Apply the trunk profile to the Proxmox uplink port</p>
+      <p class="sd">Go to <strong>Devices → [your switch] → Ports</strong>. Find the port connected to your Proxmox server (e.g., Port 1). Click it and set:<br>
+      • Profile Override: <span class="ic">Trunk-All</span><br>
+      Click <strong>Apply</strong>. The switch will now send tagged VLAN 20 and VLAN 30 frames up to Proxmox alongside native VLAN 1 traffic.</p>
+      <div class="warn-box">⚠️ After applying the trunk profile, your existing connection to Proxmox will still work because VLAN 1 (management) is the native/untagged VLAN and is unchanged.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">9</div>
+    <div class="sb">
+      <p class="sh">Set access ports for other devices (optional)</p>
+      <p class="sd">For devices you want to place on a specific VLAN (e.g., a laptop you want in the Internal zone, or a test device in the DMZ), set the port profile to that VLAN only:<br>
+      • A port for Internal-only devices: Native = <span class="ic">Internal (VLAN 20)</span>, no tagged networks<br>
+      • A port for DMZ devices: Native = <span class="ic">DMZ (VLAN 30)</span>, no tagged networks<br>
+      Devices connected here will get IPs from the matching subnet and have no visibility into other VLANs.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NETWORKING — PROXMOX BRIDGES ══ -->
+<div class="section" id="s-bridges">
+  <p class="sec-title">Proxmox network bridges</p>
+  <p class="sec-sub">Proxmox uses Linux virtual bridges to connect VMs and containers to the network. You will create one bridge per VLAN — each bridge appears to VMs as a virtual switch they plug into. The trunk from your Unifi switch delivers all three VLANs tagged on one cable; Proxmox peels them apart into separate bridges.<br><br>
+  <strong>CompTIA Network+ reference:</strong> Domain 1 — 1.1 OSI Layer 2 bridging, virtual networking concepts; Domain 2 — 2.1 Virtualization and hypervisor networking.</p>
+
+  <div class="divider">How Linux bridges and VLAN sub-interfaces work</div>
+  <div class="step">
+    <div class="sn">💡</div>
+    <div class="sb">
+      <p class="sh">The bridge model</p>
+      <p class="sd">A Linux bridge is a software Layer 2 switch running inside the OS. Each bridge has at least one physical or virtual interface as its uplink and any number of "tap" interfaces connecting to VMs/LXCs.<br><br>
+      When a trunk cable brings tagged VLAN 20 and VLAN 30 traffic to your server's NIC (e.g., <span class="ic">enp3s0</span>), Proxmox creates sub-interfaces by appending the VLAN ID:<br>
+      • <span class="ic">enp3s0.20</span> — carries only VLAN 20 frames (tag stripped)<br>
+      • <span class="ic">enp3s0.30</span> — carries only VLAN 30 frames (tag stripped)<br><br>
+      Each sub-interface then becomes the uplink for its own bridge. VMs plugged into <span class="ic">vmbr1</span> (which sits on <span class="ic">enp3s0.20</span>) only ever see VLAN 20 traffic.</p>
+      <div class="tip">📚 CompTIA Network+ 1.1 — Bridging operates at OSI Layer 2 (Data Link). A bridge forwards frames based on MAC addresses and segments collision domains. A Linux bridge behaves exactly like a hardware switch in software.</div>
+    </div>
+  </div>
+
+  <div class="divider">Step-by-step: Create bridges in Proxmox</div>
+  <div class="step">
+    <div class="sn">1</div>
+    <div class="sb">
+      <p class="sh">Open the network configuration</p>
+      <p class="sd">In the Proxmox web UI, go to <strong>Node → [your server name] → System → Network</strong>. You should already see <span class="ic">vmbr0</span> (the existing management bridge on VLAN 1). You will add two more.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">2</div>
+    <div class="sb">
+      <p class="sh">Create the VLAN 20 sub-interface</p>
+      <p class="sd">Click <strong>Create → Linux VLAN</strong>.<br>
+      • Name: <span class="ic">enp3s0.20</span> (replace <span class="ic">enp3s0</span> with your actual NIC name — find it under Proxmox shell: <span class="ic">ip link show</span>)<br>
+      • VLAN raw device: <span class="ic">enp3s0</span><br>
+      • VLAN tag: <span class="ic">20</span><br>
+      • No IP address needed — this is just a Layer 2 tap<br>
+      Click <strong>Create</strong>.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">3</div>
+    <div class="sb">
+      <p class="sh">Create bridge vmbr1 (Internal — VLAN 20)</p>
+      <p class="sd">Click <strong>Create → Linux Bridge</strong>.<br>
+      • Name: <span class="ic">vmbr1</span><br>
+      • Bridge ports: <span class="ic">enp3s0.20</span><br>
+      • No IP address needed on the bridge itself<br>
+      • Comment: <span class="ic">VLAN 20 — Internal</span><br>
+      Click <strong>Create</strong>.</p>
+      <div class="tip">VMs and LXCs added to vmbr1 will get their IP from whatever DHCP server serves the 192.168.20.0/24 range (your router, if you set up inter-VLAN routing, or a static assignment).</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">4</div>
+    <div class="sb">
+      <p class="sh">Create the VLAN 30 sub-interface</p>
+      <p class="sd">Click <strong>Create → Linux VLAN</strong>.<br>
+      • Name: <span class="ic">enp3s0.30</span><br>
+      • VLAN raw device: <span class="ic">enp3s0</span><br>
+      • VLAN tag: <span class="ic">30</span><br>
+      Click <strong>Create</strong>.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">5</div>
+    <div class="sb">
+      <p class="sh">Create bridge vmbr2 (DMZ — VLAN 30)</p>
+      <p class="sd">Click <strong>Create → Linux Bridge</strong>.<br>
+      • Name: <span class="ic">vmbr2</span><br>
+      • Bridge ports: <span class="ic">enp3s0.30</span><br>
+      • No IP address on the bridge<br>
+      • Comment: <span class="ic">VLAN 30 — DMZ</span><br>
+      Click <strong>Create</strong>.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">6</div>
+    <div class="sb">
+      <p class="sh">Apply changes and verify</p>
+      <p class="sd">Click <strong>Apply Configuration</strong> at the top of the Network page. Proxmox will write changes to <span class="ic">/etc/network/interfaces</span> and bring up the new interfaces without a reboot.<br><br>
+      Verify in the Proxmox shell:
+      </p>
+      <div class="fh">proxmox shell</div>
+      <div class="fb">ip link show enp3s0.20   <span class="cm"># should show UP</span>
+ip link show enp3s0.30   <span class="cm"># should show UP</span>
+brctl show               <span class="cm"># shows vmbr0, vmbr1, vmbr2 and their ports</span></div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">7</div>
+    <div class="sb">
+      <p class="sh">Reassign VMs to the correct bridge</p>
+      <p class="sd">Now move your VMs to the right network segment:<br>
+      • <strong>Windows 11 VM</strong> → edit Hardware → Network Device → set bridge to <span class="ic">vmbr1</span><br>
+      • <strong>Home Assistant VM</strong> → edit Hardware → Network Device → set bridge to <span class="ic">vmbr1</span><br>
+      • <strong>Docker LXC</strong> → edit Network → set bridge to <span class="ic">vmbr2</span><br>
+      • Proxmox host itself stays on <span class="ic">vmbr0</span> (VLAN 1 management)</p>
+      <div class="warn-box">⚠️ After moving the Docker LXC to vmbr2, it will get an IP in the 192.168.30.x range. Update your Nginx Proxy Manager and Portainer bookmarks to the new IP address.</div>
+    </div>
+  </div>
+
+  <div class="divider">Resulting network/interfaces file</div>
+  <div class="fh">/etc/network/interfaces (Proxmox)</div>
+  <div class="fb"><span class="cm"># Management bridge — VLAN 1 (native, untagged)</span>
+auto vmbr0
+iface vmbr0 inet static
+    address  192.168.1.10/24
+    gateway  192.168.1.1
+    bridge-ports enp3s0
+    bridge-stp off
+    bridge-fd 0
+
+<span class="cm"># VLAN 20 sub-interface</span>
+auto enp3s0.20
+iface enp3s0.20 inet manual
+    vlan-raw-device enp3s0
+
+<span class="cm"># Internal bridge — VLAN 20</span>
+auto vmbr1
+iface vmbr1 inet manual
+    bridge-ports enp3s0.20
+    bridge-stp off
+    bridge-fd 0
+
+<span class="cm"># VLAN 30 sub-interface</span>
+auto enp3s0.30
+iface enp3s0.30 inet manual
+    vlan-raw-device enp3s0
+
+<span class="cm"># DMZ bridge — VLAN 30</span>
+auto vmbr2
+iface vmbr2 inet manual
+    bridge-ports enp3s0.30
+    bridge-stp off
+    bridge-fd 0</div>
+</div>
+
+<!-- ══ NETWORKING — FIREWALL ══ -->
+<div class="section" id="s-firewall">
+  <p class="sec-title">Firewall &amp; inter-VLAN rules</p>
+  <p class="sec-sub">VLANs alone do not block traffic — they only separate it at Layer 2. A firewall operating at Layer 3 (IP routing) is what enforces the "no, you may not cross from DMZ to Internal" rule. You will configure rules in Proxmox and optionally on your Unifi Security Gateway.<br><br>
+  <strong>CompTIA Network+ reference:</strong> Domain 4 — Network Security: 4.1 Common security concepts (ACL, implicit deny, defense in depth), 4.3 Network access control — stateful vs stateless firewalls, 4.4 Basic firewall rule construction. Also CompTIA Security+ SY0-701 Domain 3 — 3.2 Firewall configuration.</p>
+
+  <div class="divider">Core firewall concepts</div>
+  <div class="step">
+    <div class="sn">💡</div>
+    <div class="sb">
+      <p class="sh">Stateful vs stateless firewalls</p>
+      <p class="sd">A <strong>stateless firewall</strong> (packet filter) evaluates each packet in isolation using a rule list: source IP, destination IP, port, protocol. It is fast but does not track connection state.<br><br>
+      A <strong>stateful firewall</strong> tracks the full conversation. When your Windows VM initiates a connection outward, the firewall remembers the session and automatically allows the return packets back — without needing a separate rule. Linux's <strong>iptables/nftables</strong> (used by Proxmox) is stateful.</p>
+      <div class="tip">📚 CompTIA Network+ 4.3 — Stateful inspection tracks the state of active connections in a state table. A return packet matching an established session is permitted without an explicit allow rule. This is more secure than stateless filtering.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">💡</div>
+    <div class="sb">
+      <p class="sh">Implicit deny (default deny)</p>
+      <p class="sd">The golden rule of firewall design: <strong>block everything, then allow only what you need</strong>. This is called "implicit deny" — if there is no rule permitting a packet, it is dropped. The alternative (permit everything, block what you know is bad) is dangerous because you can never enumerate all bad traffic.</p>
+      <div class="tip">📚 CompTIA Security+ / Network+ 4.1 — Implicit deny is the principle that any traffic not explicitly permitted by a rule is denied. It is the most secure default posture and is a foundational concept in ACL and firewall design.</div>
+    </div>
+  </div>
+
+  <div class="divider">Enable the Proxmox firewall</div>
+  <div class="step">
+    <div class="sn">1</div>
+    <div class="sb">
+      <p class="sh">Enable at the datacenter level</p>
+      <p class="sd">In the Proxmox UI: <strong>Datacenter → Firewall → Options</strong><br>
+      • Enable: <span class="ic">Yes</span><br>
+      This is the master switch — without this, all per-VM rules are ignored.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">2</div>
+    <div class="sb">
+      <p class="sh">Enable on the node (host)</p>
+      <p class="sd"><strong>Node → Firewall → Options → Enable: Yes</strong><br>
+      This protects the Proxmox host itself (port 8006, SSH, etc.) from VMs on internal bridges trying to reach the hypervisor.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">3</div>
+    <div class="sb">
+      <p class="sh">Enable on each VM and LXC</p>
+      <p class="sd">For each VM/LXC: <strong>VM → Firewall → Options → Enable: Yes</strong><br>
+      Then add rules specific to that VM. Start with the Docker LXC since it is your most exposed host.</p>
+    </div>
+  </div>
+
+  <div class="divider">Recommended rules per zone</div>
+  <div class="step">
+    <div class="sn">4</div>
+    <div class="sb">
+      <p class="sh">Docker LXC (VLAN 30 — DMZ) rules</p>
+      <p class="sd">Goal: allow only inbound HTTP/HTTPS from the internet (via port forwarding), allow all outbound, block all other inbound, and block any attempt to reach VLAN 20 (Internal).</p>
+      <table class="tbl" style="margin-top:8px;">
+        <tr><th>Direction</th><th>Protocol</th><th>Source</th><th>Dest Port</th><th>Action</th><th>Why</th></tr>
+        <tr><td>IN</td><td>TCP</td><td>any</td><td>80, 443</td><td>ACCEPT</td><td>Web traffic from internet via port forward</td></tr>
+        <tr><td>IN</td><td>TCP</td><td>192.168.1.10</td><td>any</td><td>ACCEPT</td><td>Allow Proxmox host to manage this LXC</td></tr>
+        <tr><td>IN</td><td>any</td><td>192.168.20.0/24</td><td>any</td><td>DROP</td><td>DMZ cannot be reached FROM Internal (defense in depth)</td></tr>
+        <tr><td>OUT</td><td>any</td><td>any</td><td>any</td><td>ACCEPT</td><td>Docker can initiate outbound (updates, APIs)</td></tr>
+        <tr><td>OUT</td><td>any</td><td>any</td><td>192.168.20.0/24</td><td>DROP</td><td>DMZ cannot reach Internal zone — key isolation rule</td></tr>
+      </table>
+      <div class="tip">📚 CompTIA Network+ 4.1 — Defense in depth means applying multiple overlapping layers of security. Even if a DMZ host is compromised, the firewall rule blocking DMZ→Internal access prevents lateral movement.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">5</div>
+    <div class="sb">
+      <p class="sh">Home Assistant VM (VLAN 20 — Internal) rules</p>
+      <p class="sd">Home Assistant should be able to reach the internet for updates and cloud integrations, but nothing from the DMZ should initiate connections to it.</p>
+      <table class="tbl" style="margin-top:8px;">
+        <tr><th>Direction</th><th>Protocol</th><th>Source</th><th>Dest Port</th><th>Action</th><th>Why</th></tr>
+        <tr><td>IN</td><td>TCP</td><td>192.168.1.0/24</td><td>8123</td><td>ACCEPT</td><td>Access HA dashboard from your home LAN</td></tr>
+        <tr><td>IN</td><td>any</td><td>192.168.30.0/24</td><td>any</td><td>DROP</td><td>DMZ cannot reach HA — zero trust between zones</td></tr>
+        <tr><td>OUT</td><td>any</td><td>any</td><td>any</td><td>ACCEPT</td><td>HA can reach internet for cloud integrations</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">6</div>
+    <div class="sb">
+      <p class="sh">Optional: Unifi Gateway firewall rules</p>
+      <p class="sd">If you have a Unifi Security Gateway or UDM (UniFi Dream Machine), you can also enforce inter-VLAN rules at the router level — the upstream enforcement point:<br>
+      <strong>Settings → Firewall &amp; Security → Rules → LAN In</strong><br>
+      • Create rule: Source = <span class="ic">DMZ (VLAN 30)</span>, Destination = <span class="ic">Internal (VLAN 20)</span>, Action = <strong>Drop</strong><br>
+      This is belt-and-suspenders: even if a Proxmox firewall misconfiguration occurs, the Unifi gateway still blocks the path.</p>
+      <div class="tip">📚 CompTIA Network+ 4.4 — ACL rules are evaluated top-to-bottom and processing stops at the first match. Always place specific rules before broad rules. The final implicit deny catches anything unmatched.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NETWORKING — PORT FORWARD ══ -->
+<div class="section" id="s-portfwd">
+  <p class="sec-title">Public port &amp; web access</p>
+  <p class="sec-sub">This section covers everything needed to make a service on your server reachable from the public internet — NAT port forwarding, Nginx Proxy Manager as a reverse proxy, DNS, and free SSL via Let's Encrypt. You will open exactly two ports (80 and 443) and route all domains through one gateway container.<br><br>
+  <strong>CompTIA Network+ reference:</strong> Domain 1 — 1.4 NAT and PAT concepts, 1.5 DNS record types; Domain 2 — 2.4 Proxy servers and reverse proxies; Domain 4 — 4.5 Port security and exposure minimization.</p>
+
+  <div class="divider">NAT and port forwarding concepts</div>
+  <div class="step">
+    <div class="sn">💡</div>
+    <div class="sb">
+      <p class="sh">How NAT works</p>
+      <p class="sd"><strong>Network Address Translation (NAT)</strong> is what lets hundreds of devices on your home network share a single public IP address. Your router maintains a translation table: when a device makes an outbound connection, the router rewrites the packet's source IP from (e.g.) <span class="ic">192.168.1.15</span> to your public IP and remembers the mapping. Return packets come back to the public IP, and the router forwards them to the correct internal device.</p>
+      <div class="tip">📚 CompTIA Network+ 1.4 — NAT (RFC 3022) translates private RFC 1918 addresses to a routable public address. PAT (Port Address Translation), also called NAT overload, allows many-to-one mapping by using unique source port numbers to differentiate sessions. This is what most home routers use.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">💡</div>
+    <div class="sb">
+      <p class="sh">Port forwarding (Destination NAT / DNAT)</p>
+      <p class="sd"><strong>Port forwarding</strong> is a static NAT rule that says: "inbound traffic arriving on public port X should be forwarded to internal host Y on port Z." Without it, all unsolicited inbound traffic is discarded by the router's NAT table because there is no existing session to match it.<br><br>
+      You will create two rules:<br>
+      • Public port 80 (HTTP) → 192.168.30.20 port 80 (Nginx Proxy Manager)<br>
+      • Public port 443 (HTTPS) → 192.168.30.20 port 443 (Nginx Proxy Manager)</p>
+      <div class="tip">📚 CompTIA Network+ 4.5 — Exposing the minimum number of ports necessary is called the principle of least privilege applied to network access. Opening only 80 and 443, funneled through a single proxy, is far safer than forwarding ports for each individual service.</div>
+    </div>
+  </div>
+
+  <div class="divider">Step 1 — Find your public IP / set up DDNS</div>
+  <div class="step">
+    <div class="sn">1</div>
+    <div class="sb">
+      <p class="sh">Check your public IP address type</p>
+      <p class="sd">Most residential ISPs assign a <strong>dynamic public IP</strong> — it can change when your router reboots or after a lease period. To point a domain at your home server reliably, you need <strong>Dynamic DNS (DDNS)</strong>.<br><br>
+      Check your current public IP:</p>
+      <div class="cb">curl -s https://api.ipify.org</div>
+      <p class="sd" style="margin-top:6px;">If your ISP assigns a static IP, skip to Step 2.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">2</div>
+    <div class="sb">
+      <p class="sh">Set up DDNS (Dynamic DNS)</p>
+      <p class="sd">DDNS automatically updates a DNS record whenever your public IP changes. Good free options:<br>
+      • <strong>Cloudflare</strong> — if you already manage a domain there, use the free Cloudflare DDNS Docker container<br>
+      • <strong>DuckDNS</strong> — free, gives you a <span class="ic">yourdomain.duckdns.org</span> subdomain<br>
+      • <strong>No-IP</strong> — free tier available<br><br>
+      For Cloudflare DDNS, add this to your Docker compose stack:</p>
+      <div class="fh">docker-compose.yml — add to existing stack</div>
+      <div class="fb">  cloudflare-ddns:
+    image: oznu/cloudflare-ddns:latest
+    restart: always
+    environment:
+      - API_KEY=your_cloudflare_api_token
+      - ZONE=yourdomain.com
+      - SUBDOMAIN=home           <span class="cm"># creates home.yourdomain.com</span>
+      - PROXIED=false            <span class="cm"># direct DNS, not proxied</span></div>
+      <div class="tip">📚 CompTIA Network+ 1.5 — An A record maps a hostname to an IPv4 address. A AAAA record maps to IPv6. DDNS clients continuously update the A record value as your dynamic IP changes, maintaining DNS resolution accuracy.</div>
+    </div>
+  </div>
+
+  <div class="divider">Step 2 — Create port forward rules in your router</div>
+  <div class="step">
+    <div class="sn">3</div>
+    <div name="sh">
+      <p class="sh">Port forward on a Unifi gateway (UDM/USG)</p>
+      <p class="sd">If your router is a Unifi device: <strong>Settings → Firewall &amp; Security → Port Forwarding → Create Entry</strong><br><br>
+      <strong>Rule 1 — HTTP:</strong><br>
+      • Name: <span class="ic">NPM-HTTP</span><br>
+      • Protocol: <span class="ic">TCP</span><br>
+      • WAN interface: <span class="ic">WAN (your ISP interface)</span><br>
+      • WAN port: <span class="ic">80</span><br>
+      • Forward IP: <span class="ic">192.168.30.20</span><br>
+      • Forward port: <span class="ic">80</span><br><br>
+      <strong>Rule 2 — HTTPS:</strong><br>
+      Same as above but WAN port <span class="ic">443</span> → Forward port <span class="ic">443</span><br><br>
+      Click <strong>Apply</strong>. The Unifi gateway will write these as DNAT rules in its firewall.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">4</div>
+    <div class="sb">
+      <p class="sh">Port forward on a standard consumer router</p>
+      <p class="sd">Every router is different but the fields are the same. Look for <strong>Port Forwarding</strong> or <strong>Virtual Server</strong> under Advanced settings:<br>
+      • External port: <span class="ic">80</span> / Internal IP: <span class="ic">192.168.30.20</span> / Internal port: <span class="ic">80</span><br>
+      • External port: <span class="ic">443</span> / Internal IP: <span class="ic">192.168.30.20</span> / Internal port: <span class="ic">443</span><br><br>
+      Test after saving: from outside your network (use a mobile hotspot), try accessing <span class="ic">http://[your-public-ip]</span>. You should see the Nginx Proxy Manager default page.</p>
+    </div>
+  </div>
+
+  <div class="divider">Step 3 — Configure Nginx Proxy Manager</div>
+  <div class="step">
+    <div class="sn">5</div>
+    <div class="sb">
+      <p class="sh">What is a reverse proxy?</p>
+      <p class="sd">A <strong>reverse proxy</strong> sits between the internet and your backend services. All inbound traffic hits the proxy first; the proxy inspects the hostname in the HTTP request and forwards it to the correct internal container — without the internet ever knowing the internal IPs exist.<br><br>
+      Example: a request for <span class="ic">jellyfin.yourdomain.com</span> arrives at port 443, Nginx Proxy Manager matches the hostname, decrypts the TLS, and forwards to <span class="ic">http://localhost:8096</span> (Jellyfin inside Docker). The browser sees a valid HTTPS site; Jellyfin never touches the internet directly.</p>
+      <div class="tip">📚 CompTIA Network+ 2.4 — A reverse proxy accepts requests on behalf of backend servers, providing load balancing, SSL termination, caching, and access control. It is distinct from a forward proxy, which acts on behalf of clients to reach the internet.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">6</div>
+    <div class="sb">
+      <p class="sh">Access Nginx Proxy Manager admin</p>
+      <p class="sd">NPM admin panel runs on port 81:<br>
+      <span class="ic">http://192.168.30.20:81</span> (from within your network)<br><br>
+      Default login: <span class="ic">admin@example.com</span> / <span class="ic">changeme</span><br>
+      <strong>Change these immediately after first login.</strong></p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">7</div>
+    <div class="sb">
+      <p class="sh">Add a proxy host (with free SSL)</p>
+      <p class="sd"><strong>Hosts → Proxy Hosts → Add Proxy Host</strong><br><br>
+      <strong>Details tab:</strong><br>
+      • Domain Names: <span class="ic">jellyfin.yourdomain.com</span><br>
+      • Forward Hostname/IP: <span class="ic">192.168.30.20</span> (or the Docker container name if on same network)<br>
+      • Forward Port: <span class="ic">8096</span><br>
+      • Enable: Block Common Exploits ✓, Websockets Support ✓ (required for HA and Jellyfin)<br><br>
+      <strong>SSL tab:</strong><br>
+      • SSL Certificate: <strong>Request a new SSL certificate</strong><br>
+      • Provider: Let's Encrypt<br>
+      • Force SSL: ✓<br>
+      • Email address: yours<br>
+      Click <strong>Save</strong>. NPM will contact Let's Encrypt, prove domain ownership via HTTP challenge, and install a certificate. This takes about 30 seconds.</p>
+      <div class="tip">📚 Let's Encrypt uses the ACME protocol (RFC 8555). For the HTTP-01 challenge, it sends a request to port 80 of your domain — which is why port 80 must be forwarded. The certificate is valid for 90 days and NPM auto-renews it.</div>
+    </div>
+  </div>
+  <div class="step">
+    <div class="sn">8</div>
+    <div class="sb">
+      <p class="sh">Add a static public-facing web page</p>
+      <p class="sd">To host a static HTML site (like <span class="ic">home.yourdomain.com</span>), add a Docker volume to your Nginx container and serve the files directly, or use a lightweight container:<br></p>
+      <div class="fh">docker-compose.yml — static site</div>
+      <div class="fb">  static-site:
+    image: nginx:alpine
+    restart: always
+    volumes:
+      - /mnt/data/www/site:/usr/share/nginx/html:ro
+    networks:
+      - proxy_net</div>
+      <p class="sd" style="margin-top:8px;">Then in NPM, add a proxy host pointing <span class="ic">home.yourdomain.com</span> → <span class="ic">static-site:80</span>. Drop your HTML files into <span class="ic">/mnt/data/www/site/</span> and they are live immediately at your public domain over HTTPS.</p>
+    </div>
+  </div>
+
+  <div class="divider">Security checklist before going live</div>
+  <div class="step">
+    <div class="sn">✅</div>
+    <div class="sb">
+      <p class="sh">Pre-launch hardening</p>
+      <p class="sd">Before your domain goes public, verify each of these:</p>
+      <table class="tbl" style="margin-top:8px;">
+        <tr><th>Check</th><th>Why it matters</th><th>CompTIA ref</th></tr>
+        <tr><td>Proxmox web UI (port 8006) is NOT port-forwarded</td><td>Hypervisor management must never be internet-facing</td><td>Network+ 4.5 — Least privilege</td></tr>
+        <tr><td>SSH is NOT port-forwarded (use VPN for remote admin)</td><td>SSH on port 22 receives constant brute-force attempts</td><td>Security+ 3.3 — Remote access security</td></tr>
+        <tr><td>NPM admin port 81 is blocked at the router (only LAN access)</td><td>Admin panel has full proxy control — should not be public</td><td>Network+ 4.1 — Defense in depth</td></tr>
+        <tr><td>Force SSL is enabled on all proxy hosts</td><td>Redirects any HTTP to HTTPS — no plaintext credentials</td><td>Network+ 4.2 — Encryption in transit</td></tr>
+        <tr><td>DMZ → Internal firewall rule is active and tested</td><td>Compromise of public service cannot pivot to home network</td><td>Network+ 4.3 — Segmentation</td></tr>
+        <tr><td>Let's Encrypt certificate is issued and auto-renewing</td><td>Expired cert causes browser warnings and breaks trust</td><td>Security+ 3.9 — PKI and certificate lifecycle</td></tr>
+      </table>
+    </div>
+  </div>
 </div>
 
 <!-- ══ POWER BUDGET ══ -->
